@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="customer_photo_view_search" model="ir.ui.view">
+        <field name="name">mconfort.customer.photo.search</field>
+        <field name="model">mconfort.customer.photo</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="city"/>
+                <filter name="pending" string="To Validate" domain="[('state', '=', 'pending')]"/>
+                <filter name="approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <filter name="rejected" string="Rejected" domain="[('state', '=', 'rejected')]"/>
+                <separator/>
+                <filter name="published" string="Published" domain="[('is_published', '=', True)]"/>
+                <filter name="featured" string="Featured" domain="[('featured', '=', True)]"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'public_categ_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="customer_photo_view_kanban" model="ir.ui.view">
+        <field name="name">mconfort.customer.photo.kanban</field>
+        <field name="model">mconfort.customer.photo</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" quick_create="false" sample="1">
+                <field name="state"/>
+                <!-- every `record.<name>` used below must be declared here, or it is undefined in the browser -->
+                <field name="featured"/>
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside class="o_kanban_aside_full">
+                            <field name="cover_image_128" widget="image" options="{'img_class': 'object-fit-cover'}" alt="Photo"/>
+                        </aside>
+                        <main class="ps-2">
+                            <field name="name" class="fw-bold fs-5"/>
+                            <div><field name="product_id"/></div>
+                            <div class="text-muted"><field name="city"/> · <field name="submitted_on" widget="date"/></div>
+                            <div class="d-flex gap-1 mt-1">
+                                <span t-if="record.featured.raw_value" class="badge rounded-pill text-bg-warning">Featured</span>
+                                <span class="badge rounded-pill text-bg-light"><field name="image_count"/> photos</span>
+                                <span class="badge rounded-pill text-bg-light"><i class="fa fa-heart me-1" title="Likes"/><field name="like_count"/></span>
+                            </div>
+                            <footer class="pt-1">
+                                <field name="activity_ids" widget="kanban_activity"/>
+                            </footer>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="customer_photo_view_list" model="ir.ui.view">
+        <field name="name">mconfort.customer.photo.list</field>
+        <field name="model">mconfort.customer.photo</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="submitted_on"/>
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="public_categ_id"/>
+                <field name="city"/>
+                <field name="image_count"/>
+                <field name="like_count"/>
+                <field name="featured" widget="boolean_toggle"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'pending'"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"/>
+                <field name="is_published" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="customer_photo_view_form" model="ir.ui.view">
+        <field name="name">mconfort.customer.photo.form</field>
+        <field name="model">mconfort.customer.photo</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary"
+                            invisible="state == 'approved'" groups="mconfort_customer_photos.group_manager"/>
+                    <button name="action_reject" type="object" string="Reject" class="btn-secondary"
+                            invisible="state == 'rejected'" groups="mconfort_customer_photos.group_manager"/>
+                    <button name="action_reset_to_pending" type="object" string="Reset to Pending"
+                            invisible="state == 'pending'" groups="mconfort_customer_photos.group_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,approved"/>
+                </header>
+                <sheet>
+                    <div name="button_box" class="oe_button_box">
+                        <button name="website_publish_button" type="object" class="oe_stat_button" icon="fa-globe">
+                            <field name="is_published" widget="website_publish_button"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Customer">
+                            <field name="firstname"/>
+                            <field name="lastname"/>
+                            <field name="partner_id"/>
+                            <field name="city"/>
+                            <field name="submitted_on"/>
+                        </group>
+                        <group string="Purchase">
+                            <field name="product_id"/>
+                            <field name="public_categ_id" options="{'no_create': True}"/>
+                            <field name="sale_order_id"/>
+                            <field name="featured"/>
+                            <field name="like_count"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="comment" placeholder="The customer's review, shown on the website."/>
+                        <field name="reject_reason" invisible="state == 'approved'"
+                               placeholder="Optional note for the team. Not shown on the website."/>
+                    </group>
+                    <notebook>
+                        <page string="Photos" name="photos">
+                            <field name="image_ids" mode="kanban" context="{'default_submission_id': id}">
+                                <kanban>
+                                    <field name="sequence" widget="handle"/>
+                                    <templates>
+                                        <t t-name="card">
+                                            <field name="image_512" widget="image" options="{'img_class': 'o_image_256_cover'}" alt="Photo"/>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                                <form>
+                                    <group>
+                                        <field name="image_1920" widget="image" nolabel="1" colspan="2"/>
+                                        <field name="sequence"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_customer_photo" model="ir.actions.act_window">
+        <field name="name">Customer Photos</field>
+        <field name="res_model">mconfort.customer.photo</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_pending': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No customer photo yet</p>
+            <p>Photos customers send from the website land here. Approve them to publish them.</p>
+        </field>
+    </record>
+
+    <!-- Website ▸ eCommerce ▸ Products section (client's choice). A first-level entry of the
+         Website app would need children to be drawn (website navbar filters leaf sections). -->
+    <menuitem id="menu_customer_photos" name="Customer Photos"
+              parent="website_sale.menu_catalog" sequence="25"
+              action="action_customer_photo" groups="mconfort_customer_photos.group_manager"/>
+
+</odoo>

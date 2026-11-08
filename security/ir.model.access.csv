@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_customer_photo_manager,mconfort.customer.photo manager,model_mconfort_customer_photo,group_manager,1,1,1,1
+access_customer_photo_image_manager,mconfort.customer.photo.image manager,model_mconfort_customer_photo_image,group_manager,1,1,1,1
+access_customer_photo_user,mconfort.customer.photo user,model_mconfort_customer_photo,base.group_user,1,0,0,0
+access_customer_photo_image_user,mconfort.customer.photo.image user,model_mconfort_customer_photo_image,base.group_user,1,0,0,0
+access_customer_photo_portal,mconfort.customer.photo portal,model_mconfort_customer_photo,base.group_portal,1,0,0,0
+access_customer_photo_image_portal,mconfort.customer.photo.image portal,model_mconfort_customer_photo_image,base.group_portal,1,0,0,0
+access_customer_photo_public,mconfort.customer.photo public,model_mconfort_customer_photo,base.group_public,1,0,0,0
+access_customer_photo_image_public,mconfort.customer.photo.image public,model_mconfort_customer_photo_image,base.group_public,1,0,0,0

@@ -1,0 +1,571 @@
+// Customer photos gallery (/photos-clients). Colours and shapes follow the client's mockups
+// (odoo/mnt/_photo_mockup): navy / gold on a warm off-white.
+
+.o_mcp_gallery {
+    --mcp-navy: #14234A;
+    --mcp-gold: #E59A12;
+    --mcp-muted: #5B6577;
+    --mcp-sand: #E8E2D6;
+    --mcp-line: #EEE9DF;
+    --mcp-green: #1E8A4C;
+    background: #FBF9F5;
+    color: var(--mcp-navy);
+
+    .o_mcp_breadcrumb {
+        --bs-breadcrumb-divider: "›";
+        font-size: .875rem;
+        a { color: var(--mcp-muted); text-decoration: none; }
+        .active { color: var(--mcp-navy); font-weight: 600; }
+    }
+
+    .o_mcp_title {
+        font-size: unquote("clamp(2rem, 4vw, 2.9rem)");
+        font-weight: 800;
+        letter-spacing: -.01em;
+        margin: 0;
+    }
+    .o_mcp_rule {
+        width: 80px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--mcp-gold);
+        margin: 1.1rem auto;
+    }
+    .o_mcp_subtitle {
+        max-width: 720px;
+        font-size: 1.15rem;
+        color: var(--mcp-muted);
+        margin-bottom: 0;
+    }
+
+    // ---- Filters ---------------------------------------------------------
+    // Desktop: category chips on the left, sort on the right. Phones: the chips give way to two selects
+    // (category + sort) side by side, see the media query below.
+    .o_mcp_filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .o_mcp_chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+    }
+    .o_mcp_chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .6rem;
+        min-height: 46px;
+        padding: 0 1.3rem;
+        border: 1px solid var(--mcp-navy);
+        border-radius: 23px;
+        color: var(--mcp-navy);
+        font-weight: 600;
+        font-size: .95rem;
+        white-space: nowrap;
+        text-decoration: none;
+        svg { font-size: 1.25rem; }
+        &.active { background: var(--mcp-navy); color: #fff; }
+        &:hover:not(.active) { background: rgba(20, 35, 74, .06); }
+    }
+    .o_mcp_sortform { display: inline-flex; align-items: center; gap: .5rem; margin: 0; }
+    // Each select comes with its label ("Category", "Sort by"). Desktop: label and select on one line.
+    .o_mcp_sort_field { display: inline-flex; align-items: center; gap: .5rem; }
+    .o_mcp_field_label { margin: 0; color: var(--mcp-muted); white-space: nowrap; }
+    .o_mcp_sort, .o_mcp_categ_select {
+        min-height: 46px;
+        border-radius: 23px;
+        border-color: #CFC8B8;
+        padding-inline: 1rem 2.2rem;
+    }
+    // The category select is for phones. Hidden here it still submits its value (a hidden select does),
+    // so changing the sort on desktop keeps the current category.
+    .o_mcp_categ_field { display: none; }
+
+    @media (max-width: 575.98px) {
+        .o_mcp_filters { display: block; margin-top: 1.25rem; }
+        .o_mcp_chips { display: none; }   // replaced by the select; also hidden from screen readers
+        .o_mcp_sortform {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .5rem;
+        }
+        // Phones: the small caption sits above its select (a visible "index" for each field).
+        .o_mcp_categ_field, .o_mcp_sort_field {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: .25rem;
+            min-width: 0;
+        }
+        .o_mcp_field_label { padding-left: .8rem; font-size: .72rem; font-weight: 600; letter-spacing: .02em; }
+        .o_mcp_sort, .o_mcp_categ_select {
+            width: 100%;
+            min-width: 0;
+            font-size: .85rem;
+            padding-inline: .8rem 1.75rem;
+            text-overflow: ellipsis;
+        }
+    }
+
+    // ---- Cards -----------------------------------------------------------
+    .o_mcp_card {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+        &:hover .o_mcp_figure img { transform: scale(1.04); }
+    }
+    .o_mcp_figure {
+        position: relative;
+        margin: 0;
+        aspect-ratio: 4 / 3;
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--mcp-sand);
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .3s ease;
+            @media (prefers-reduced-motion: reduce) { transition: none; }
+        }
+    }
+    .o_mcp_pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .4rem .75rem;
+        border-radius: 14px;
+        font-size: .8rem;
+        font-weight: 700;
+        line-height: 1.2;
+        background: rgba(255, 255, 255, .94);
+        color: var(--mcp-navy);
+    }
+    .o_mcp_pill_verified {
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        svg { color: var(--mcp-green); }
+    }
+    .o_mcp_pill_verified_soft {
+        background: #E6F3EA;
+        color: #1E6B3A;
+        svg { color: var(--mcp-green); }
+    }
+    label[for="o_mcp_sort"] { white-space: nowrap; }
+
+    // ---- Lightbox --------------------------------------------------------
+    .o_mcp_lightbox {
+        position: fixed;
+        inset: 0;
+        z-index: 1055; // Bootstrap modal level
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        &.d-none { display: none !important; }
+    }
+    .o_mcp_lb_backdrop { position: absolute; inset: 0; background: rgba(10, 19, 48, .62); }
+    .o_mcp_lb_dialog {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        width: unquote("min(1400px, 100%)"); // plain `min()` is evaluated by Sass: "Incompatible units"
+        max-height: 100%;
+        overflow-y: auto;
+        border-radius: 28px;
+        background: #fff;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, .22);
+    }
+    // Left column: the photo fills the whole panel (cropped to fit, `cover`), with the badge + like on top of
+    // it, the arrows on the sides and the thumbnails at the bottom.
+    .o_mcp_lb_media {
+        position: relative;
+        // 600 + the details column's 380 fit a 1024 px window side by side; extra width goes 2:1 to the photo.
+        flex: 2 1 600px;
+        min-width: 0;
+        min-height: 380px;
+        background: #0F1730;
+        @media (min-width: 992px) { min-height: 700px; }
+    }
+    .o_mcp_lb_stage { position: absolute; inset: 0; overflow: hidden; }
+    // Centred; gallery.js sets its width / height (a little smaller than "cover"). Until then: plain cover.
+    .o_mcp_lb_image {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        object-fit: cover;
+    }
+    .o_mcp_lb_top {
+        position: absolute;
+        inset: 0 0 auto 0;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        padding: 20px;
+        pointer-events: none;
+        > * { pointer-events: auto; }
+    }
+    .o_mcp_lb_verified { position: static; padding: .5rem 1rem; }
+    .o_mcp_lb_like {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        min-height: 44px;
+        padding: 0 1rem;
+        border: 0;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, .94);
+        color: var(--mcp-navy);
+        font-weight: 700;
+        svg { font-size: 1.25rem; color: #B3581A; opacity: .55; }
+        &.active svg { opacity: 1; }
+    }
+    .o_mcp_lb_nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 48px;
+        height: 48px;
+        border: 0;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, .94);
+        color: var(--mcp-navy);
+        font-size: 1.6rem;
+        line-height: 1;
+        &.o_mcp_lb_prev { left: 20px; }
+        &.o_mcp_lb_next { right: 20px; }
+    }
+    .o_mcp_lb_thumbs {
+        position: absolute;
+        z-index: 1;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        max-width: unquote("calc(100% - 40px)");
+        overflow-x: auto;
+        padding: 8px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, .94);
+        &:empty { display: none; }
+    }
+    .o_mcp_lb_thumb {
+        flex: 0 0 auto;
+        width: 84px;
+        height: 56px;
+        padding: 0;
+        overflow: hidden;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        background: #D8D0C0;
+        img { width: 100%; height: 100%; object-fit: cover; }
+        &[aria-current="true"] { border-color: var(--mcp-navy); }
+    }
+    .o_mcp_lb_info {
+        position: relative;
+        flex: 1 1 380px;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        padding: 2.25rem 2.5rem 2rem;
+        @media (max-width: 575.98px) { padding: 1.5rem 1.25rem; }
+    }
+    .o_mcp_lb_close {
+        position: absolute;
+        right: 20px;
+        top: 18px;
+        width: 44px;
+        height: 44px;
+        border: 0;
+        background: transparent;
+        color: var(--mcp-navy);
+        font-size: 1.8rem;
+        line-height: 1;
+    }
+    .o_mcp_lb_icon {
+        flex: 0 0 60px;
+        width: 60px;
+        height: 60px;
+        border-radius: 30px;
+        background: #FBEBD2;
+        color: #B36B00;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.9rem;
+        > span:not(.d-none) { display: flex; }
+    }
+    .o_mcp_lb_title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
+        @media (max-width: 575.98px) { font-size: 1.15rem; }
+    }
+    @media (max-width: 575.98px) {
+        .o_mcp_lb_icon { flex-basis: 44px; width: 44px; height: 44px; font-size: 1.35rem; }
+        .o_mcp_lb_dialog { border-radius: 20px; }
+        .o_mcp_lb_meta > span + span { margin-left: 0; padding-left: 0; border-left: 0; }
+    }
+    .o_mcp_lb_product {
+        color: inherit;
+        text-decoration: none;
+        &[href] { text-decoration: underline; text-decoration-color: var(--mcp-gold); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+        &[href]:hover { color: var(--mcp-navy); text-decoration-color: var(--mcp-navy); }
+    }
+    .o_mcp_lb_meta {
+        gap: .75rem 0;
+        > span + span { margin-left: 1.25rem; padding-left: 1.25rem; border-left: 1px solid #DDD7C9; }
+        .fa { color: var(--mcp-gold); margin-right: .35rem; }
+    }
+    .o_mcp_lb_comment {
+        margin: 0;
+        padding-top: .5rem;
+        border-top: 1px solid var(--mcp-line);
+        font-style: italic;
+        line-height: 1.6;
+        white-space: pre-line;
+    }
+    .o_mcp_lb_author { padding-top: 1rem; border-top: 1px solid var(--mcp-line); }
+    .o_mcp_lb_avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 24px;
+        background: #FBEBD2;
+        color: #B36B00;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+    .o_mcp_lb_trust {
+        gap: .75rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--mcp-line);
+        font-size: .875rem;
+        font-weight: 600;
+        text-align: center;
+        li { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+        li + li { border-left: 1px solid #DDD7C9; }
+        .fa { font-size: 1.75rem; color: var(--mcp-gold); }
+    }
+
+    // ---- Call to action + upload modal (lot 3) ---------------------------
+    .o_mcp_btn_primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .75rem;
+        min-height: 54px;
+        padding: 0 2rem;
+        border: 0;
+        border-radius: 27px;
+        background: var(--mcp-navy);
+        color: #fff;
+        font-weight: 700;
+        &:hover:not(:disabled) { background: #0a1330; color: #fff; }
+        &:disabled { opacity: .6; }
+    }
+    .o_mcp_upload {
+        position: fixed;
+        inset: 0;
+        z-index: 1055;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        &.d-none { display: none !important; }
+    }
+    .o_mcp_up_dialog {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        width: unquote("min(1200px, 100%)");
+        max-height: 100%;
+        overflow-y: auto;
+        border-radius: 28px;
+        background: #fff;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, .22);
+        @media (max-width: 575.98px) { border-radius: 20px; }
+    }
+    .o_mcp_up_aside {
+        flex: 1 1 400px;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        gap: .6rem;
+        padding: 2.5rem 2rem;
+        text-align: center;
+        color: #fff;
+        background: linear-gradient(160deg, #2a3d6e 0%, var(--mcp-navy) 100%);
+        .fa { font-size: 2.75rem; }
+        strong { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
+        .o_mcp_up_aside_text { font-size: .8rem; line-height: 1.45; }
+        // Picture set in Website settings: cover it, keep the text readable with a navy fade at the bottom.
+        &.has_image {
+            position: relative;
+            background-color: var(--mcp-navy);
+            background-size: cover;
+            background-position: center;
+            &::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(180deg, rgba(20, 35, 74, 0) 35%, rgba(20, 35, 74, .82) 100%);
+            }
+            > * { position: relative; }
+        }
+        @media (max-width: 767.98px) { display: none; } // the form is what matters on a phone
+    }
+    .o_mcp_up_main {
+        position: relative;
+        flex: 1 1 460px;
+        min-width: 0;
+        padding: 2rem 2.5rem 1.75rem;
+        @media (max-width: 575.98px) { padding: 1.5rem 1.25rem; }
+    }
+    .o_mcp_up_close {
+        position: absolute;
+        right: 20px;
+        top: 18px;
+        z-index: 1;
+        width: 44px;
+        height: 44px;
+        border: 0;
+        border-radius: 22px;
+        background: #F6F1E8;
+        color: var(--mcp-navy);
+        font-size: 1.6rem;
+        line-height: 1;
+    }
+    .o_mcp_up_title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        line-height: 1.15;
+        margin: 0 0 .5rem;
+        @media (max-width: 575.98px) { font-size: 1.35rem; }
+    }
+    .o_mcp_dropzone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .4rem;
+        padding: 1.5rem 1.25rem;
+        border: 2px dashed #B7BCC8;
+        border-radius: 18px;
+        background: #F8F9FB;
+        text-align: center;
+        cursor: pointer;
+        > .fa { font-size: 2.5rem; }
+        strong { font-size: 1.1rem; font-weight: 800; }
+        &.o_mcp_dragging { border-color: var(--mcp-gold); background: #FBEBD2; }
+    }
+    .o_mcp_dropzone_btn {
+        margin-top: .4rem;
+        display: inline-flex;
+        align-items: center;
+        gap: .6rem;
+        min-height: 44px;
+        padding: 0 1.4rem;
+        border-radius: 22px;
+        background: #FBEBD2;
+        font-weight: 700;
+    }
+    .o_mcp_file_input:focus-visible + .o_mcp_previews { outline: 3px solid var(--mcp-gold); outline-offset: 2px; }
+    .o_mcp_previews:empty { display: none !important; }
+    .o_mcp_preview {
+        position: relative;
+        width: 76px;
+        height: 56px;
+        img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+        button {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border: 0;
+            border-radius: 12px;
+            background: var(--mcp-navy);
+            color: #fff;
+            line-height: 1;
+        }
+    }
+    .o_mcp_up_note { font-size: .72rem; line-height: 1.4; }
+    .o_mcp_label { display: block; margin-bottom: .35rem; font-size: .875rem; font-weight: 700; }
+    .o_mcp_input {
+        min-height: 48px;
+        border-color: #B7BCC8;
+        border-radius: 12px;
+        background-color: #fff;
+        color: var(--mcp-navy);
+    }
+    textarea.o_mcp_input { resize: vertical; }
+    .o_mcp_hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .o_mcp_thanks_icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 72px;
+        height: 72px;
+        border-radius: 36px;
+        background: #E6F3EA;
+        color: var(--mcp-green);
+        font-size: 2rem;
+    }
+    .o_mcp_thanks { padding: 2rem 0; &:focus { outline: none; } }
+
+    // ---- Phones: plain photo cards + one slim upload bar (the client's screenshot) -----------------
+    // Tighter grid, rounder corners. (The cards are plain photos on every size: verified badge, product
+    // and likes live in the lightbox.)
+    @media (max-width: 575.98px) {
+        .o_mcp_grid { --bs-gutter-x: .75rem; --bs-gutter-y: .75rem; }
+        .o_mcp_figure { border-radius: 14px; }
+    }
+    // The upload card, identical on every screen size; the whole bar opens the upload window.
+    .o_mcp_cta_bar {
+        display: flex;
+        align-items: center;
+        gap: .85rem;
+        width: 100%;
+        margin-top: 1.75rem;
+        padding: .75rem 1rem;
+        border: 0;
+        border-radius: 26px;
+        background: #F4F1EC;
+        color: var(--mcp-navy);
+        text-align: left;
+        > svg { flex: none; font-size: 1.6rem; }
+        > .fa { flex: none; margin-left: auto; font-size: 1.6rem; }
+    }
+    .o_mcp_cta_bar_text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        line-height: 1.3;
+        strong { font-size: .95rem; font-weight: 700; }
+        // One line at any phone width (the text shrinks a little with the screen instead of wrapping)
+        span { font-size: unquote("clamp(.6rem, 2.9vw, .78rem)"); color: var(--mcp-muted); white-space: nowrap; }
+    }
+
+    button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible {
+        outline: 3px solid var(--mcp-gold);
+        outline-offset: 2px;
+    }
+}

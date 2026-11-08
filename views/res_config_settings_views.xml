@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.customer.photos</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='website_info_settings']" position="inside">
+                <setting id="customer_photos_upload_image" string="Upload Picture"
+                         help="Picture shown in the upload window."
+                         invisible="not website_id">
+                    <field name="customer_photos_upload_image" widget="image" class="w-50 mt-2"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

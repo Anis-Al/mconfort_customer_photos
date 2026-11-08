@@ -1,0 +1,620 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* mconfort_customer_photos
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e-20260724\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-04 14:30+0000\n"
+"PO-Revision-Date: 2026-11-04 14:30+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fr_FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"<i class=\"fa fa-camera\"/>\n"
+"                            <strong>Share your interior<br/>with M'Confort</strong>\n"
+"                            <span class=\"o_mcp_up_aside_text\">Inspire other customers by sharing a photo of your purchase.</span>"
+msgstr ""
+"<i class=\"fa fa-camera\"/>\n"
+"                            <strong>Partagez votre intérieur<br/>avec M'Confort</strong>\n"
+"                            <span class=\"o_mcp_up_aside_text\">Inspirez d'autres clients en partageant une photo de votre achat.</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.s_customer_photos
+msgid "<i class=\"fa fa-check-circle-o me-2\" role=\"img\"/>Satisfied customers"
+msgstr "<i class=\"fa fa-check-circle-o me-2\" role=\"img\"/>Clients satisfaits"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_kanban
+msgid "<i class=\"fa fa-heart me-1\" title=\"Likes\"/>"
+msgstr "<i class=\"fa fa-heart me-1\" title=\"J'aime\"/>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.s_customer_photos
+msgid "<i class=\"fa fa-home me-2\" role=\"img\"/>Real interiors"
+msgstr "<i class=\"fa fa-home me-2\" role=\"img\"/>Intérieurs réels"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.s_customer_photos
+msgid "<i class=\"fa fa-map-marker me-2\" role=\"img\"/>All across Mayotte"
+msgstr "<i class=\"fa fa-map-marker me-2\" role=\"img\"/>Partout à Mayotte"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "<i class=\"fa fa-paper-plane\" aria-hidden=\"true\"/> Post my photo"
+msgstr "<i class=\"fa fa-paper-plane\" aria-hidden=\"true\"/> Publier ma photo"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.s_customer_photos
+msgid ""
+"<i class=\"fa fa-picture-o me-2\" role=\"img\"/>See more customer photos<i "
+"class=\"fa fa-angle-right ms-2\" role=\"img\"/>"
+msgstr ""
+"<i class=\"fa fa-picture-o me-2\" role=\"img\"/>Voir plus de photos "
+"clients<i class=\"fa fa-angle-right ms-2\" role=\"img\"/>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"<i class=\"fa fa-picture-o\" aria-hidden=\"true\"/>\n"
+"                                    <strong>Add your photos</strong>\n"
+"                                    <span class=\"text-muted small\">Drag and drop your images here<br/>or click to select them.</span>\n"
+"                                    <span class=\"o_mcp_dropzone_btn\"><i class=\"fa fa-picture-o\" aria-hidden=\"true\"/> Choose photos</span>"
+msgstr ""
+"<i class=\"fa fa-picture-o\" aria-hidden=\"true\"/>\n"
+"                                    <strong>Ajouter vos photos</strong>\n"
+"                                    <span class=\"text-muted small\">Glissez-déposez vos images ici<br/>ou cliquez pour les sélectionner.</span>\n"
+"                                    <span class=\"o_mcp_dropzone_btn\"><i class=\"fa fa-picture-o\" aria-hidden=\"true\"/> Choisir des photos</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"<i class=\"fa fa-shield\" aria-hidden=\"true\"/> Your photo will be checked "
+"by our team before publication."
+msgstr ""
+"<i class=\"fa fa-shield\" aria-hidden=\"true\"/> Votre photo sera vérifiée "
+"par notre équipe avant publication."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"<i class=\"fa fa-shield\" aria-"
+"hidden=\"true\"/><span>M'Confort<br/>warranty</span>"
+msgstr ""
+"<i class=\"fa fa-shield\" aria-"
+"hidden=\"true\"/><span>Garantie<br/>M'Confort</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "<i class=\"fa fa-truck\" aria-hidden=\"true\"/><span>Home<br/>delivery</span>"
+msgstr ""
+"<i class=\"fa fa-truck\" aria-hidden=\"true\"/><span>Livraison<br/>à "
+"domicile</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"<i class=\"fa fa-wrench\" aria-"
+"hidden=\"true\"/><span>Assembly<br/>included</span>"
+msgstr ""
+"<i class=\"fa fa-wrench\" aria-"
+"hidden=\"true\"/><span>Montage<br/>inclus</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"<span class=\"d-flex align-items-center gap-3\">\n"
+"                                    <span class=\"o_mcp_lb_avatar\" aria-hidden=\"true\"><i class=\"fa fa-user\"/></span>\n"
+"                                    <span>\n"
+"                                        <strong class=\"d-block\" data-slot=\"author\"/>\n"
+"                                        <span class=\"text-muted small\">M'Confort customer</span>\n"
+"                                    </span>\n"
+"                                </span>"
+msgstr ""
+"<span class=\"d-flex align-items-center gap-3\">\n"
+"                                    <span class=\"o_mcp_lb_avatar\" aria-hidden=\"true\"><i class=\"fa fa-user\"/></span>\n"
+"                                    <span>\n"
+"                                        <strong class=\"d-block\" data-slot=\"author\"/>\n"
+"                                        <span class=\"text-muted small\">Client M'Confort</span>\n"
+"                                    </span>\n"
+"                                </span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "<span class=\"d-none\" data-slot=\"photo-word\">Photo</span>"
+msgstr "<span class=\"d-none\" data-slot=\"photo-word\">Photo</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "<span class=\"d-none\" data-slot=\"remove-word\">Remove photo</span>"
+msgstr "<span class=\"d-none\" data-slot=\"remove-word\">Retirer la photo</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"<span class=\"o_mcp_cta_bar_text\">\n"
+"                            <strong>Send us your interior</strong>\n"
+"                            <span>Share a photo of your M'Confort purchase</span>\n"
+"                        </span>\n"
+"                        <i class=\"fa fa-angle-right\" aria-hidden=\"true\"/>"
+msgstr ""
+"<span class=\"o_mcp_cta_bar_text\">\n"
+"                            <strong>Envoyez-nous votre intérieur</strong>\n"
+"                            <span>Partagez une photo de votre achat M'Confort</span>\n"
+"                        </span>\n"
+"                        <i class=\"fa fa-angle-right\" aria-hidden=\"true\"/>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.s_customer_photos
+msgid "<span class=\"s_cp_line\">At home,</span><span>with M'Confort</span>"
+msgstr "<span class=\"s_cp_line\">Chez vous,</span><span>avec M'Confort</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.s_customer_photos
+msgid ""
+"<span class=\"s_cp_line\">Our customers share</span><span>their "
+"interiors.</span>"
+msgstr ""
+"<span class=\"s_cp_line\">Nos clients partagent</span><span>leur "
+"intérieur.</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "<span class=\"text-muted\">Purchased at M'Confort</span>"
+msgstr "<span class=\"text-muted\">Achat réalisé chez M'Confort</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Add your photo"
+msgstr "Ajouter votre photo"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "All ("
+msgstr "Toutes ("
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_form
+msgid "Approve"
+msgstr "Approuver"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields.selection,name:mconfort_customer_photos.selection__mconfort_customer_photo__state__approved
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_search
+msgid "Approved"
+msgstr "Approuvée"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Categories"
+msgstr "Catégories"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__public_categ_id
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_search
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Category"
+msgstr "Catégorie"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__city
+msgid "City"
+msgstr "Ville"
+
+#. module: mconfort_customer_photos
+#. odoo-python
+#: code:addons/mconfort_customer_photos/controllers/main.py:0
+msgid "Client M'Confort"
+msgstr "Client M'Confort"
+
+#. module: mconfort_customer_photos
+#. odoo-python
+#: code:addons/mconfort_customer_photos/controllers/main.py:0
+msgid "Client M'Confort – %s"
+msgstr "Client M'Confort – %s"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Close"
+msgstr "Fermer"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__cover_image_id
+msgid "Cover Image"
+msgstr "Photo de couverture"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__partner_id
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_form
+msgid "Customer"
+msgstr "Client"
+
+#. module: mconfort_customer_photos
+#: model:ir.model,name:mconfort_customer_photos.model_mconfort_customer_photo
+msgid "Customer Photo"
+msgstr "Photo client"
+
+#. module: mconfort_customer_photos
+#: model:ir.model,name:mconfort_customer_photos.model_mconfort_customer_photo_image
+msgid "Customer Photo Image"
+msgstr "Image de photo client"
+
+#. module: mconfort_customer_photos
+#. odoo-python
+#: code:addons/mconfort_customer_photos/controllers/main.py:0
+#: model:ir.actions.act_window,name:mconfort_customer_photos.action_customer_photo
+#: model:ir.ui.menu,name:mconfort_customer_photos.menu_customer_photos
+#: model:res.groups.privilege,name:mconfort_customer_photos.res_groups_privilege_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.snippets
+msgid "Customer Photos"
+msgstr "Photos clients"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Discover real interiors of our customers all over Mayotte."
+msgstr "Découvrez des intérieurs réels de nos clients partout à Mayotte."
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__featured
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_kanban
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_search
+msgid "Featured"
+msgstr "Mise en avant"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__firstname
+msgid "First Name"
+msgstr "Prénom"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "First name <span class=\"text-danger\">*</span>"
+msgstr "Prénom <span class=\"text-danger\">*</span>"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Home"
+msgstr "Accueil"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo_image__image_1920
+msgid "Image"
+msgstr "Image"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__image_count
+msgid "Image Count"
+msgstr "Nombre de photos"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__is_published
+msgid "Is Published"
+msgstr "Est publiée"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__lastname
+msgid "Last Name"
+msgstr "Nom"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Last name <span class=\"text-danger\">*</span>"
+msgstr "Nom <span class=\"text-danger\">*</span>"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__like_count
+msgid "Like Count"
+msgstr "Nombre de J'aime"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Most liked"
+msgstr "Les plus aimées"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Most recent"
+msgstr "Les plus récentes"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__name
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo_image__name
+msgid "Name"
+msgstr "Nom"
+
+#. module: mconfort_customer_photos
+#. odoo-python
+#: code:addons/mconfort_customer_photos/models/customer_photo.py:0
+msgid "New customer photo to validate"
+msgstr "Nouvelle photo client à valider"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Next photo"
+msgstr "Photo suivante"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.actions.act_window,help:mconfort_customer_photos.action_customer_photo
+msgid "No customer photo yet"
+msgstr "Aucune photo client pour le moment"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "No customer photo yet."
+msgstr "Aucune photo client pour le moment."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "OK"
+msgstr "OK"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"One of the files is not a valid image (JPEG, PNG, WebP or GIF, 8 MB "
+"maximum)."
+msgstr ""
+"L'un des fichiers n'est pas une image valide (JPEG, PNG, WebP ou GIF, 8 Mo "
+"maximum)."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_form
+msgid "Optional note for the team. Not shown on the website."
+msgstr "Note facultative pour l'équipe. Non affichée sur le site."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Our customers at home"
+msgstr "Nos clients chez eux"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_form
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_kanban
+msgid "Photo"
+msgstr "Photo"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__image_ids
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_form
+msgid "Photos"
+msgstr "Photos"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.actions.act_window,help:mconfort_customer_photos.action_customer_photo
+msgid ""
+"Photos customers send from the website land here. Approve them to publish "
+"them."
+msgstr ""
+"Les photos envoyées par les clients depuis le site arrivent ici. Approuvez-"
+"les pour les publier."
+
+#. module: mconfort_customer_photos
+#. odoo-javascript
+#: code:addons/mconfort_customer_photos/static/src/website_builder/customer_photos_option.xml:0
+msgid "Photos shown"
+msgstr "Photos affichées"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,help:mconfort_customer_photos.field_res_config_settings__customer_photos_upload_image
+#: model:ir.model.fields,help:mconfort_customer_photos.field_website__customer_photos_upload_image
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.res_config_settings_view_form
+msgid "Picture shown in the upload window."
+msgstr "Image affichée dans la fenêtre d'envoi."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Please enter your first and last name and add at least one photo."
+msgstr "Indiquez votre prénom et votre nom, et ajoutez au moins une photo."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Previous photo"
+msgstr "Photo précédente"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__product_id
+msgid "Product"
+msgstr "Produit"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_search
+msgid "Published"
+msgstr "Publiée"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_form
+msgid "Purchase"
+msgstr "Achat"
+
+#. module: mconfort_customer_photos
+#: model:res.groups,comment:mconfort_customer_photos.group_manager
+msgid ""
+"Receives an activity for every new customer photo and can approve or reject "
+"it."
+msgstr ""
+"Reçoit une activité pour chaque nouvelle photo client et peut l'approuver ou"
+" la refuser."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_form
+msgid "Reject"
+msgstr "Refuser"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__reject_reason
+msgid "Reject Reason"
+msgstr "Motif du refus"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields.selection,name:mconfort_customer_photos.selection__mconfort_customer_photo__state__rejected
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_search
+msgid "Rejected"
+msgstr "Refusée"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_form
+msgid "Reset to Pending"
+msgstr "Remettre à valider"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__comment
+msgid "Review"
+msgstr "Avis"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__sale_order_id
+msgid "Sale Order"
+msgstr "Commande"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo_image__sequence
+msgid "Sequence"
+msgstr "Séquence"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Share your experience (quality, comfort, delivery, assembly…)"
+msgstr "Partagez votre expérience (qualité, confort, livraison, montage…)"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"Share your experience and show your interior to the M'Confort community."
+msgstr ""
+"Partagez votre expérience et montrez votre intérieur à la communauté "
+"M'Confort."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Something went wrong. Please try again."
+msgstr "Un problème est survenu. Veuillez réessayer."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Sort by"
+msgstr "Trier par"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__state
+msgid "State"
+msgstr "Statut"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_search
+msgid "Status"
+msgstr "Statut"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo_image__submission_id
+msgid "Submission"
+msgstr "Envoi"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__submitted_on
+msgid "Submitted On"
+msgstr "Envoyée le"
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_mconfort_customer_photo__submitter_ip
+msgid "Submitter Ip"
+msgstr "IP de l'expéditeur"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Thank you!"
+msgstr "Merci !"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_form
+msgid "The customer's review, shown on the website."
+msgstr "L'avis du client, affiché sur le site."
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields.selection,name:mconfort_customer_photos.selection__mconfort_customer_photo__state__pending
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_search
+msgid "To Validate"
+msgstr "À valider"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"Too many submissions from your connection. Please try again in a few "
+"minutes."
+msgstr ""
+"Trop d'envois depuis votre connexion. Réessayez dans quelques minutes."
+
+#. module: mconfort_customer_photos
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_res_config_settings__customer_photos_upload_image
+#: model:ir.model.fields,field_description:mconfort_customer_photos.field_website__customer_photos_upload_image
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.res_config_settings_view_form
+msgid "Upload Picture"
+msgstr "Image d'envoi"
+
+#. module: mconfort_customer_photos
+#: model:res.groups,name:mconfort_customer_photos.group_manager
+msgid "Validator"
+msgstr "Validateur"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Verified customer"
+msgstr "Client vérifié"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Verified purchase"
+msgstr "Achat vérifié"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "You can send up to 8 photos."
+msgstr "Vous pouvez envoyer jusqu'à 8 photos."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Your first name"
+msgstr "Votre prénom"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Your last name"
+msgstr "Votre nom"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid ""
+"Your photo has been received. It will appear on this page once our team has "
+"checked it."
+msgstr ""
+"Votre photo a bien été reçue. Elle apparaîtra sur cette page une fois "
+"vérifiée par notre équipe."
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "Your review (optional)"
+msgstr "Votre avis (facultatif)"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.gallery
+msgid "breadcrumb"
+msgstr "Fil d'Ariane"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.snippets
+msgid ""
+"customer photos, clients, interiors, gallery, photos clients, intérieurs"
+msgstr "photos clients, clients, intérieurs, galerie, customer photos"
+
+#. module: mconfort_customer_photos
+#: model_terms:ir.ui.view,arch_db:mconfort_customer_photos.customer_photo_view_kanban
+msgid "photos"
+msgstr "photos"

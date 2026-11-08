@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Icons: sized by font-size (1em), coloured by currentColor. -->
+    <template id="icon_all" name="Customer Photos: all icon">
+        <svg aria-hidden="true" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+    </template>
+    <template id="icon_camera" name="Customer Photos: camera icon">
+        <svg aria-hidden="true" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+    </template>
+    <template id="icon_heart" name="Customer Photos: heart icon">
+        <svg aria-hidden="true" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+    </template>
+    <template id="icon_verified" name="Customer Photos: verified icon">
+        <svg aria-hidden="true" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="11"/><path d="M7.5 12.5l3 3 6-7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </template>
+
+    <!-- Gallery page -->
+    <template id="gallery" name="Customer Photos Gallery">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Customer Photos</t>
+            <div id="wrap" class="o_mcp_gallery" t-att-data-open="open_card">
+                <div class="oe_structure oe_empty" id="oe_structure_mcp_gallery_top"/>
+                <div class="container pt-3 pb-5">
+
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb o_mcp_breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="/">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Customer Photos</li>
+                        </ol>
+                    </nav>
+
+                    <header class="text-center mt-4">
+                        <h1 class="o_mcp_title">Our customers at home</h1>
+                        <div class="o_mcp_rule" aria-hidden="true"/>
+                        <p class="o_mcp_subtitle mx-auto">Discover real interiors of our customers all over Mayotte.</p>
+                    </header>
+
+                    <div class="o_mcp_filters">
+                        <nav class="o_mcp_chips" aria-label="Categories">
+                            <a t-att-href="all_url" t-attf-class="o_mcp_chip #{'active' if categ == 'all' else ''}" t-att-aria-current="'page' if categ == 'all' else None">
+                                <t t-call="mconfort_customer_photos.icon_all"/>
+                                <span>All (<t t-out="total_all"/>)</span>
+                            </a>
+                            <!-- One chip per first-level shop category that has published photos. -->
+                            <t t-foreach="chips" t-as="chip">
+                                <a t-att-href="chip['url']" t-attf-class="o_mcp_chip #{'active' if categ == chip['id'] else ''}" t-att-aria-current="'page' if categ == chip['id'] else None">
+                                    <span><t t-out="chip['name']"/> (<t t-out="chip['count']"/>)</span>
+                                </a>
+                            </t>
+                        </nav>
+                        <form action="/photos-clients" method="get" class="o_mcp_sortform">
+                            <!-- Phones: the chips are replaced by this select (hidden on desktop, where it still
+                                 submits the current category along with the sort). -->
+                            <span class="o_mcp_categ_field">
+                                <label for="o_mcp_categ" class="o_mcp_field_label">Category</label>
+                                <select id="o_mcp_categ" name="categ" class="o_mcp_categ_select form-select">
+                                    <option value="all" t-att-selected="categ == 'all'">All (<t t-out="total_all"/>)</option>
+                                    <t t-foreach="chips" t-as="chip">
+                                        <option t-att-value="chip['id']" t-att-selected="categ == chip['id']"><t t-out="chip['name']"/> (<t t-out="chip['count']"/>)</option>
+                                    </t>
+                                </select>
+                            </span>
+                            <span class="o_mcp_sort_field">
+                                <label for="o_mcp_sort" class="o_mcp_field_label">Sort by</label>
+                                <select id="o_mcp_sort" name="sort" class="o_mcp_sort form-select">
+                                    <option value="recent" t-att-selected="sort == 'recent'">Most recent</option>
+                                    <option value="likes" t-att-selected="sort == 'likes'">Most liked</option>
+                                </select>
+                            </span>
+                            <noscript><button type="submit" class="btn btn-outline-primary">OK</button></noscript>
+                        </form>
+                    </div>
+
+                    <div t-if="cards" class="o_mcp_grid row g-3 g-lg-4 mt-1">
+                        <t t-foreach="cards" t-as="card">
+                            <div class="col-6 col-md-4 col-lg-3">
+                                <a t-attf-href="/photos-clients?open=#{card['id']}" class="o_mcp_card" t-att-data-id="card['id']" t-att-data-lightbox="card['json']">
+                                    <figure class="o_mcp_figure">
+                                        <!-- Plain photo: verified badge, product and likes are in the lightbox the card opens. -->
+                                        <img t-att-src="card['image']" t-att-alt="card['product'] or card['author']" loading="lazy"/>
+                                    </figure>
+                                </a>
+                            </div>
+                        </t>
+                    </div>
+                    <p t-else="" class="text-center text-muted my-5">No customer photo yet.</p>
+
+                    <div t-if="pager['page_count'] > 1" class="d-flex justify-content-center mt-5">
+                        <t t-call="website.pager"/>
+                    </div>
+
+                    <!-- Upload card: one slim bar on every screen size; the whole bar opens the upload window. -->
+                    <button type="button" class="o_mcp_open_upload o_mcp_cta_bar">
+                        <t t-call="mconfort_customer_photos.icon_camera"/>
+                        <span class="o_mcp_cta_bar_text">
+                            <strong>Send us your interior</strong>
+                            <span>Share a photo of your M'Confort purchase</span>
+                        </span>
+                        <i class="fa fa-angle-right" aria-hidden="true"/>
+                    </button>
+                </div>
+                <div class="oe_structure oe_empty" id="oe_structure_mcp_gallery_bottom"/>
+
+                <!-- Lightbox. Static copy lives here (so it is translated like any view);
+                     gallery.js only fills the data-slot elements from the card's JSON. -->
+                <div class="o_mcp_lightbox d-none" role="dialog" aria-modal="true" aria-labelledby="o_mcp_lb_title">
+                    <span class="d-none" data-slot="photo-word">Photo</span>
+                    <div class="o_mcp_lb_backdrop" data-action="close"/>
+                    <div class="o_mcp_lb_dialog">
+                        <div class="o_mcp_lb_media">
+                            <div class="o_mcp_lb_top">
+                                <span class="o_mcp_pill o_mcp_pill_verified o_mcp_lb_verified">
+                                    <t t-call="mconfort_customer_photos.icon_verified"/> Verified purchase
+                                </span>
+                                <button type="button" class="o_mcp_lb_like" data-action="like" aria-pressed="false">
+                                    <t t-call="mconfort_customer_photos.icon_heart"/>
+                                    <span class="visually-hidden">Like</span>
+                                    <span data-slot="likes"/>
+                                </button>
+                            </div>
+                            <div class="o_mcp_lb_stage">
+                                <img class="o_mcp_lb_image" data-slot="image" alt=""/>
+                                <button type="button" class="o_mcp_lb_nav o_mcp_lb_prev" data-action="prev" aria-label="Previous photo">&#8249;</button>
+                                <button type="button" class="o_mcp_lb_nav o_mcp_lb_next" data-action="next" aria-label="Next photo">&#8250;</button>
+                            </div>
+                            <div class="o_mcp_lb_thumbs" data-slot="thumbs"/>
+                        </div>
+                        <div class="o_mcp_lb_info">
+                            <button type="button" class="o_mcp_lb_close" data-action="close" aria-label="Close">&#215;</button>
+                            <div class="d-flex align-items-center gap-3 pe-5">
+                                <span class="o_mcp_lb_icon" aria-hidden="true">
+                                    <i class="fa fa-camera"/>
+                                </span>
+                                <div>
+                                    <strong id="o_mcp_lb_title" class="o_mcp_lb_title d-block"><a class="o_mcp_lb_product" data-slot="product"/></strong>
+                                    <span class="text-muted">Purchased at M'Confort</span>
+                                </div>
+                            </div>
+                            <div class="o_mcp_lb_meta d-flex flex-wrap align-items-center">
+                                <span data-slot="city-row"><i class="fa fa-map-marker" aria-hidden="true"/> <span data-slot="city"/></span>
+                                <span data-slot="date-row"><i class="fa fa-calendar" aria-hidden="true"/> <span data-slot="date"/></span>
+                            </div>
+                            <p class="o_mcp_lb_comment" data-slot="comment"/>
+                            <div class="o_mcp_lb_author d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <span class="d-flex align-items-center gap-3">
+                                    <span class="o_mcp_lb_avatar" aria-hidden="true"><i class="fa fa-user"/></span>
+                                    <span>
+                                        <strong class="d-block" data-slot="author"/>
+                                        <span class="text-muted small">M'Confort customer</span>
+                                    </span>
+                                </span>
+                                <span class="o_mcp_pill o_mcp_pill_verified_soft">
+                                    <t t-call="mconfort_customer_photos.icon_verified"/> Verified customer
+                                </span>
+                            </div>
+                            <ul class="o_mcp_lb_trust list-unstyled d-flex mb-0 mt-auto">
+                                <li><i class="fa fa-truck" aria-hidden="true"/><span>Home<br/>delivery</span></li>
+                                <li><i class="fa fa-wrench" aria-hidden="true"/><span>Assembly<br/>included</span></li>
+                                <li><i class="fa fa-shield" aria-hidden="true"/><span>M'Confort<br/>warranty</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload modal (lot 3). Same approach as the lightbox: static copy rendered here,
+                     gallery.js drives it and posts the files to /photos-clients/submit. -->
+                <div class="o_mcp_upload d-none" role="dialog" aria-modal="true" aria-labelledby="o_mcp_up_title">
+                    <span class="d-none" data-slot="remove-word">Remove photo</span>
+                    <div class="o_mcp_lb_backdrop" data-upload-action="close"/>
+                    <div class="o_mcp_up_dialog">
+                        <aside t-attf-class="o_mcp_up_aside #{'has_image' if upload_image else ''}" aria-hidden="true"
+                               t-attf-style="#{('background-image: url(%s)' % upload_image) if upload_image else ''}">
+                            <i class="fa fa-camera"/>
+                            <strong>Share your interior<br/>with M'Confort</strong>
+                            <span class="o_mcp_up_aside_text">Inspire other customers by sharing a photo of your purchase.</span>
+                        </aside>
+                        <div class="o_mcp_up_main">
+                            <button type="button" class="o_mcp_up_close" data-upload-action="close" aria-label="Close">&#215;</button>
+
+                            <form class="o_mcp_upload_form d-flex flex-column gap-3" method="post" action="/photos-clients/submit" enctype="multipart/form-data" novalidate="novalidate">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="pe-5">
+                                    <h2 id="o_mcp_up_title" class="o_mcp_up_title">Add your photo</h2>
+                                    <p class="text-muted mb-0">Share your experience and show your interior to the M'Confort community.</p>
+                                </div>
+
+                                <label class="o_mcp_dropzone" for="o_mcp_files">
+                                    <i class="fa fa-picture-o" aria-hidden="true"/>
+                                    <strong>Add your photos</strong>
+                                    <span class="text-muted small">Drag and drop your images here<br/>or click to select them.</span>
+                                    <span class="o_mcp_dropzone_btn"><i class="fa fa-picture-o" aria-hidden="true"/> Choose photos</span>
+                                </label>
+                                <input id="o_mcp_files" class="o_mcp_file_input visually-hidden" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple="multiple"/>
+                                <div class="o_mcp_previews d-flex flex-wrap gap-2" data-slot="previews"/>
+
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <label for="o_mcp_firstname" class="o_mcp_label">First name <span class="text-danger">*</span></label>
+                                        <input id="o_mcp_firstname" name="firstname" type="text" class="o_mcp_input form-control" required="required" maxlength="60" autocomplete="given-name" placeholder="Your first name" t-att-value="prefill_first or None"/>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="o_mcp_lastname" class="o_mcp_label">Last name <span class="text-danger">*</span></label>
+                                        <input id="o_mcp_lastname" name="lastname" type="text" class="o_mcp_input form-control" required="required" maxlength="60" autocomplete="family-name" placeholder="Your last name" t-att-value="prefill_last or None"/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="o_mcp_comment" class="o_mcp_label">Your review (optional)</label>
+                                    <textarea id="o_mcp_comment" name="comment" rows="3" maxlength="1000" class="o_mcp_input form-control" placeholder="Share your experience (quality, comfort, delivery, assembly…)"/>
+                                </div>
+                                <!-- Honeypot: off-screen, skipped by keyboard and screen readers. -->
+                                <div class="o_mcp_hp" aria-hidden="true"><input type="text" name="hp_url" tabindex="-1" autocomplete="off"/></div>
+
+                                <div class="o_mcp_errors text-danger" role="alert">
+                                    <p class="d-none mb-0" data-error="invalid">Please enter your first and last name and add at least one photo.</p>
+                                    <p class="d-none mb-0" data-error="too_many">You can send up to 8 photos.</p>
+                                    <p class="d-none mb-0" data-error="file">One of the files is not a valid image (JPEG, PNG, WebP or GIF, 8 MB maximum).</p>
+                                    <p class="d-none mb-0" data-error="rate">Too many submissions from your connection. Please try again in a few minutes.</p>
+                                    <p class="d-none mb-0" data-error="network">Something went wrong. Please try again.</p>
+                                </div>
+                                <button type="submit" class="o_mcp_btn_primary o_mcp_submit btn"><i class="fa fa-paper-plane" aria-hidden="true"/> Post my photo</button>
+                                <p class="o_mcp_up_note text-muted text-center mb-0"><i class="fa fa-shield" aria-hidden="true"/> Your photo will be checked by our team before publication.</p>
+                            </form>
+
+                            <div class="o_mcp_thanks d-none text-center" role="status" tabindex="-1">
+                                <span class="o_mcp_thanks_icon" aria-hidden="true"><i class="fa fa-check"/></span>
+                                <h2 class="o_mcp_up_title mt-3">Thank you!</h2>
+                                <p class="text-muted">Your photo has been received. It will appear on this page once our team has checked it.</p>
+                                <button type="button" class="o_mcp_btn_primary btn" data-upload-action="close">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

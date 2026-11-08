@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Home page block "Chez vous, avec M'Confort". Text and trust row are plain editable
+         content; only the photo mosaic is filled by s_customer_photos.js from /photos-clients/featured. -->
+    <template id="s_customer_photos" name="Customer Photos">
+        <section class="s_customer_photos pt48 pb48" data-snippet="s_customer_photos" data-name="Customer Photos" data-limit="3">
+            <div class="container">
+                <div class="row align-items-center g-4 g-lg-5">
+                    <div class="col-lg-4">
+                        <!-- Two lines on desktop, one on phones: .s_cp_line is a block from lg up, an inline
+                             span with a gap below (no <br/>, whitespace next to it is stripped by translations) -->
+                        <h2 class="s_cp_title"><span class="s_cp_line">At home,</span><span>with M'Confort</span></h2>
+                        <p class="s_cp_subtitle"><span class="s_cp_line">Our customers share</span><span>their interiors.</span></p>
+                        <div class="s_cp_rule" role="separator"/>
+                        <a href="/photos-clients" class="btn btn-outline-primary rounded-pill s_cp_button"><i class="fa fa-picture-o me-2" role="img"/>See more customer photos<i class="fa fa-angle-right ms-2" role="img"/></a>
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="s_customer_photos_content o_not_editable"/>
+                    </div>
+                </div>
+                <div class="row mt-4 s_cp_trust text-center">
+                    <div class="col-4"><i class="fa fa-check-circle-o me-2" role="img"/>Satisfied customers</div>
+                    <div class="col-4"><i class="fa fa-home me-2" role="img"/>Real interiors</div>
+                    <div class="col-4"><i class="fa fa-map-marker me-2" role="img"/>All across Mayotte</div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="snippets" inherit_id="website.snippets" name="Customer Photos snippet">
+        <xpath expr="//snippets[@id='snippet_structure']" position="inside">
+            <t t-snippet="mconfort_customer_photos.s_customer_photos" string="Customer Photos" group="people"
+               t-thumbnail="/mconfort_customer_photos/static/description/s_customer_photos.svg">
+                <keywords>customer photos, clients, interiors, gallery, photos clients, intérieurs</keywords>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>

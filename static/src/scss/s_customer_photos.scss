@@ -1,0 +1,125 @@
+// Home page block "Chez vous, avec M'Confort" (colours from the client's mockup).
+
+.s_customer_photos {
+    --cp-navy: #14234A;
+    --cp-gold: #E59A12;
+    --cp-muted: #5B6577;
+    background-color: #FBF3EA;
+    color: var(--cp-navy);
+
+    // Phones: both fit on one line, as in the mobile mockup.
+    .s_cp_title { font-size: 2.6rem; font-weight: 800; line-height: 1.1; @media (max-width: 575.98px) { font-size: 1.5rem; } }
+    .s_cp_subtitle { font-size: 1.35rem; line-height: 1.35; color: var(--cp-muted); margin-top: .75rem; @media (max-width: 575.98px) { font-size: 1.02rem; } }
+    .s_cp_rule { width: 64px; height: 4px; border-radius: 2px; background: var(--cp-gold); margin: 1rem 0 1.75rem; }
+    .s_cp_button {
+        min-height: 54px;
+        display: inline-flex;
+        align-items: center;
+        border: 2px solid var(--cp-navy);
+        background: #fff;
+        color: var(--cp-navy);
+        font-weight: 700;
+        &:hover { background: var(--cp-navy); color: #fff; }
+    }
+    .s_cp_trust {
+        font-weight: 500;
+        .fa { color: var(--cp-gold); font-size: 1.75rem; vertical-align: middle; }
+        > div { padding-block: .35rem; }
+        > div + div { border-left: 1px solid #DDD7C9; }
+        // Desktop: more air between the photos and the row. !important because the markup carries Bootstrap's
+        // `mt-4` (also on blocks already dropped on a page), which is !important itself.
+        @media (min-width: 992px) { margin-top: 3.5rem !important; }
+        // Phones: the three items always share ONE row (icon + text side by side, as in the mockup).
+        // Equal thirds and no wrapping whatever the column classes of the markup (a block dropped
+        // before this rule has `col-12`), and the text scales with the screen so it still fits at 320 px.
+        @media (max-width: 575.98px) {
+            flex-wrap: nowrap;
+            font-size: unquote("clamp(.54rem, 2.6vw, .7rem)");
+            > div { flex: 0 0 33.3334%; width: 33.3334%; max-width: 33.3334%; padding-inline: .15rem; white-space: nowrap; }
+            .fa { font-size: 1.5em; margin-right: .2rem !important; }
+        }
+    }
+    @media (max-width: 575.98px) {
+        .s_cp_button { font-size: .85rem; padding-inline: 1rem; min-height: 50px; }
+    }
+
+    // ---- Phone and tablet: one column, in this order --------------------------------
+    // rule, title, subtitle, mosaic, trust row, button. The button sits in the text column on desktop, so
+    // that column and the first row dissolve (display: contents): their children become siblings of the
+    // trust row and `order` can move the button last, without a second copy of it to maintain.
+    @media (max-width: 991.98px) {
+        > .container { display: flex; flex-direction: column; }
+        > .container > .row:first-child, .col-lg-4 { display: contents; }
+        .s_cp_rule { order: 1; margin: 0 auto 1.1rem; }
+        .s_cp_title { order: 2; text-align: center; margin-bottom: 0; }
+        .s_cp_subtitle { order: 3; text-align: center; margin: .5rem 0 1.5rem; }
+        .col-lg-8 { order: 4; padding-inline: 0; }
+        .s_cp_trust { order: 5; }
+        .s_cp_button { order: 6; align-self: center; margin-top: 1.75rem; }
+    }
+    // First line of the title / subtitle: its own line on desktop, a word group followed by a gap otherwise.
+    .s_cp_line {
+        margin-right: .28em;
+        @media (min-width: 992px) { display: block; margin-right: 0; }
+    }
+
+    // ---- Mosaic: one large tile + two small ones ----------------------------
+    .s_cp_mosaic {
+        display: grid;
+        grid-template-columns: 1.55fr 1fr;
+        grid-template-rows: repeat(2, minmax(160px, 1fr));
+        gap: 16px;
+        &.s_cp_mosaic_n1 { grid-template-columns: 1fr; grid-template-rows: minmax(350px, 1fr); }
+        &.s_cp_mosaic_n2 .s_cp_tile:nth-child(2) { grid-row: span 2; }
+        @media (max-width: 767.98px) {
+            // Same shape as desktop (large tile left, two stacked right), sized by ratio instead of pixels.
+            grid-template-columns: 1.3fr 1fr;
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+            aspect-ratio: 16 / 9;
+            gap: 10px;
+            &.s_cp_mosaic_n1 { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr); aspect-ratio: 4 / 3; }
+            .s_cp_tile { border-radius: 16px; &:first-child { min-height: 0; } }
+            .s_cp_caption { left: 8px; bottom: 8px; max-width: unquote("calc(100% - 16px)"); padding: .3rem .55rem; font-size: .66rem; }
+            &.s_cp_mosaic_n3 .s_cp_tile:first-child .s_cp_caption, &.s_cp_mosaic_n1 .s_cp_caption { left: 10px; bottom: 10px; font-size: .72rem; }
+        }
+    }
+    .s_cp_tile {
+        position: relative;
+        margin: 0;
+        overflow: hidden;
+        border-radius: 22px;
+        background: #E8E2D6;
+        &:first-child { grid-row: span 2; min-height: 350px; }
+        img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .3s ease;
+            @media (prefers-reduced-motion: reduce) { transition: none; }
+        }
+        &:hover img { transform: scale(1.04); }
+    }
+    .s_cp_link {
+        position: absolute;
+        inset: 0;
+        &:focus-visible { outline: 3px solid var(--cp-gold); outline-offset: -3px; border-radius: 22px; }
+    }
+    .s_cp_caption {
+        position: absolute;
+        left: 14px;
+        bottom: 14px;
+        width: fit-content;
+        max-width: unquote("calc(100% - 28px)");
+        padding: .45rem .8rem;
+        border-radius: 14px;
+        background: rgba(20, 35, 74, .72);
+        color: #fff;
+        font-size: .8rem;
+        font-weight: 600;
+        pointer-events: none;
+    }
+    .s_cp_mosaic_n3 .s_cp_tile:first-child .s_cp_caption,
+    .s_cp_mosaic_n1 .s_cp_caption { left: 16px; bottom: 16px; font-size: .85rem; }
+}
