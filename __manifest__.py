@@ -15,6 +15,7 @@
         'views/res_config_settings_views.xml',
         'views/website_templates.xml',
         'views/snippets/s_customer_photos.xml',
+        'data/ir_cron_data.xml',
     ],
     'assets': {
         'web.assets_frontend': [

@@ -1,5 +1,7 @@
 # Part of the mconfort_customer_photos module. Licensed under LGPL-3.
 
+from datetime import timedelta
+
 from odoo import _, api, fields, models
 from odoo.tools.misc import format_date
 
@@ -104,6 +106,15 @@ class CustomerPhoto(models.Model):
                     user_id=user.id,
                     summary=_("New customer photo to validate"),
                 )
+
+    @api.model
+    def _cron_purge_submitter_ip(self):
+        """The IP only serves the upload rate limit (minutes). Personal data: erase it after a day."""
+        old = self.sudo().search([
+            ('submitter_ip', '!=', False),
+            ('create_date', '<', fields.Datetime.now() - timedelta(days=1)),
+        ])
+        old.with_context(mail_notrack=True).write({'submitter_ip': False})
 
     # ------------------------------------------------------------------
     # Website

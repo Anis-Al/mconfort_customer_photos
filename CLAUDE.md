@@ -535,6 +535,16 @@ variants were the 8 MB original — a page of 24 could weigh ~190 MB. **This sup
 - **Still open from the review** (not done): strip EXIF/GPS from JPEGs ≤ 1920 px (privacy, `image_1920` is served
   publicly), rate-limit check before decoding files, purge `submitter_ip`, minor items. Python → elevated restart.
 
+### 2026-11-08 — code review fix: submitter IPs are erased after a day
+
+`submitter_ip` is personal data used only for the 10-minute upload rate limit, but it was kept forever.
+`data/ir_cron_data.xml` (noupdate) adds the daily cron **"Customer Photos: erase submitter IPs"** →
+`mconfort.customer.photo._cron_purge_submitter_ip()`: clears the IP of every submission created more than 24 h ago
+(`mail_notrack`). Test: old one erased, recent one kept, cron installed and active (59 tests, 0 failed). Run once by hand
+on `mconfort` after install. The cron's name is not translated into French (admin-only). Python + data → elevated restart.
+The first git commit (`0f34ead`, pushed to `Anis-Al/mconfort_customer_photos`, no co-author) predates this fix and the
+WebP conversion log entry's code is in it; this change is **not committed yet**.
+
 ## Design notes
 
 - **Notification = `activity_schedule`** on every validator (group `all_user_ids`), closed by

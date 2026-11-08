@@ -123,6 +123,20 @@ class TestCustomerPhoto(Common):
         used = set(re.findall(r'record\.(\w+)', ' '.join(root.xpath('//@*[contains(., "record.")]'))))
         self.assertFalse(used - declared, used - declared)
 
+    def test_cron_erases_ips_older_than_a_day_and_keeps_recent_ones(self):
+        from datetime import timedelta
+        from odoo import fields
+        old = self._submission(submitter_ip='10.0.0.1')
+        recent = self._submission(submitter_ip='10.0.0.2')
+        # create_date is set by the ORM: backdate it in SQL (with the Python clock, PG's is not UTC here)
+        self.env.cr.execute("UPDATE mconfort_customer_photo SET create_date = %s WHERE id = %s",
+                            [fields.Datetime.now() - timedelta(days=2), old.id])
+        old.invalidate_recordset()
+        self.env['mconfort.customer.photo']._cron_purge_submitter_ip()
+        self.assertFalse(old.submitter_ip)
+        self.assertEqual(recent.submitter_ip, '10.0.0.2')
+        self.assertTrue(self.env.ref('mconfort_customer_photos.ir_cron_purge_submitter_ip').active)
+
     def test_website_url_opens_the_lightbox(self):
         photo = self._submission()
         self.assertEqual(photo.website_url, f"/photos-clients?open={photo.id}")
