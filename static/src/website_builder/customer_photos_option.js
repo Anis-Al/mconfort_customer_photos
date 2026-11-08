@@ -8,10 +8,6 @@ export class CustomerPhotosOption extends BaseOptionComponent {
     static selector = ".s_customer_photos";
 }
 
-/**
- * Writes the setting on the block and restarts its interaction, so the mosaic is
- * fetched and redrawn at once in the editor.
- */
 export class CustomerPhotosSettingAction extends BuilderAction {
     static id = "customerPhotosSetting";
     static dependencies = ["edit_interaction"];

@@ -3,23 +3,13 @@ import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 
 const FOCUSABLE = "button:not([disabled]):not(.d-none), input:not([type=hidden]):not([tabindex='-1']), textarea";
-const MAX_PHOTOS = 8; // keep in step with controllers/main.py
-// Lightbox photo size between "whole photo" (0) and "cropped to fill the panel" (1). 0.75 = mostly filled, but
-// zoomed out a bit so more of the photo shows; a thin dark band may appear on one side. Raise it to crop more.
+const MAX_PHOTOS = 8;
 const LIGHTBOX_FILL = 0.75;
 
-/**
- * /photos-clients: sort select, lightbox and likes.
- *
- * The lightbox markup (and its translated text) is rendered by the server in
- * `gallery`; this only fills its `data-slot` elements from the card's JSON
- * (`data-lightbox`), so there is no detail route.
- */
 export class CustomerPhotoGallery extends Interaction {
     static selector = ".o_mcp_gallery";
     dynamicContent = {
         ".o_mcp_card": { "t-on-click.prevent": this.onCardClick },
-        // The category select (phones) and the sort select share one form: either one reloads the page.
         ".o_mcp_sort, .o_mcp_categ_select": { "t-on-change": this.onSortChange },
         ".o_mcp_lightbox": { "t-on-click": this.onLightboxClick },
         ".o_mcp_open_upload": { "t-on-click.prevent": this.openUpload },
@@ -45,10 +35,7 @@ export class CustomerPhotoGallery extends Interaction {
     }
 
     start() {
-        // Size the lightbox photo each time one finishes loading.
         this.addListener(this.slot("image"), "load", () => this.fitImage());
-        // Deep link /photos-clients?open=<id>: the server sends the card even when it is on
-        // another page or filter.
         if (this.el.dataset.open) {
             this.open(JSON.parse(this.el.dataset.open));
         }
@@ -62,9 +49,6 @@ export class CustomerPhotoGallery extends Interaction {
         return this.lightbox.querySelector(`[data-slot="${name}"]`);
     }
 
-    // ------------------------------------------------------------------
-    // Handlers
-    // ------------------------------------------------------------------
 
     onSortChange(ev) {
         ev.target.form.submit();
@@ -109,7 +93,6 @@ export class CustomerPhotoGallery extends Interaction {
         } else if (this.card && ev.key === "ArrowRight") {
             this.go(1);
         } else if (ev.key === "Tab") {
-            // Keep focus inside the dialog while it is open.
             const items = [...(uploading ? this.upload : this.lightbox).querySelectorAll(FOCUSABLE)];
             const first = items[0];
             const last = items.at(-1);
@@ -123,9 +106,6 @@ export class CustomerPhotoGallery extends Interaction {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Upload modal
-    // ------------------------------------------------------------------
 
     get upload() {
         return this.el.querySelector(".o_mcp_upload");
@@ -179,7 +159,7 @@ export class CustomerPhotoGallery extends Interaction {
 
     onFilesChosen(ev) {
         this.addFiles(ev.target.files);
-        ev.target.value = ""; // so choosing the same file again fires `change`
+        ev.target.value = "";
     }
 
     addFiles(fileList) {
@@ -188,7 +168,6 @@ export class CustomerPhotoGallery extends Interaction {
                 this.files.push(file);
             }
         }
-        // The server is the authority on size and count; this only keeps the form usable.
         this.files.length = Math.min(this.files.length, MAX_PHOTOS);
         this.renderPreviews();
     }
@@ -226,20 +205,18 @@ export class CustomerPhotoGallery extends Interaction {
         }
         const form = ev.currentTarget;
         const button = form.querySelector(".o_mcp_submit");
-        // Same checks as the server's 'invalid', so the usual mistake needs no round trip.
         if (!form.firstname.value.trim() || !form.lastname.value.trim() || !this.files.length) {
             this.showUploadError("invalid");
             return;
         }
         this.showUploadError(null);
-        const body = new FormData(form); // the file input has no name: photos are added below
+        const body = new FormData(form);
         this.files.forEach((file) => body.append("photos", file));
         this.sending = true;
         button.disabled = true;
         let error = null;
         try {
             const response = await this.waitFor(fetch(form.action, { method: "POST", body }));
-            // An oversized body is answered by the framework with HTML, not our JSON.
             const data = await this.waitFor(response.json().catch(() => ({ error: "network" })));
             error = data.error || (response.ok ? null : "network");
         } catch {
@@ -260,9 +237,6 @@ export class CustomerPhotoGallery extends Interaction {
         thanks.focus();
     }
 
-    // ------------------------------------------------------------------
-    // Lightbox
-    // ------------------------------------------------------------------
 
     open(card, opener = null) {
         this.card = card;
@@ -271,14 +245,10 @@ export class CustomerPhotoGallery extends Interaction {
         this.render();
         this.lightbox.classList.remove("d-none");
         document.body.classList.add("overflow-hidden");
-        this.fitImage(); // the panel has a size now (it was display: none while rendering)
+        this.fitImage();
         this.lightbox.querySelector(".o_mcp_lb_close").focus();
     }
 
-    /**
-     * Photo size: halfway-ish between "whole photo" and "cropped to fill the panel" (see LIGHTBOX_FILL),
-     * centred in the panel. Plain CSS cannot blend `contain` and `cover`.
-     */
     fitImage() {
         const img = this.slot("image");
         const { clientWidth: width, clientHeight: height } = img.parentElement;
@@ -314,7 +284,6 @@ export class CustomerPhotoGallery extends Interaction {
         }
         card.liked = res.liked;
         card.likes = res.count;
-        // Keep the card's data in step, so reopening it shows the new count and heart.
         const cardEl = this.el.querySelector(`.o_mcp_card[data-id="${card.id}"]`);
         if (cardEl) {
             cardEl.dataset.lightbox = JSON.stringify(card);
@@ -362,7 +331,6 @@ export class CustomerPhotoGallery extends Interaction {
         );
 
         text("product", card.product || card.author);
-        // A link only when the shop shows that product; otherwise plain text.
         const product = this.slot("product");
         if (card.product_url) {
             product.setAttribute("href", card.product_url);

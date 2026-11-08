@@ -12,6 +12,7 @@ Same standing rules as `aa_loyalty_points` — they outlive any single conversat
 3. **Design rationale lives in "Design notes"** at the bottom.
 4. **`mconfort` is the working database.** Install and test there.
 5. Wording is **English** in the source; French in `i18n/fr.po`, copy taken verbatim from the mockups.
+6. **No comments in the source.** Explanations go to "Code comments" at the bottom of this file.
 
 | Lot | Scope | Status |
 |---|---|---|
@@ -545,6 +546,14 @@ on `mconfort` after install. The cron's name is not translated into French (admi
 The first git commit (`0f34ead`, pushed to `Anis-Al/mconfort_customer_photos`, no co-author) predates this fix and the
 WebP conversion log entry's code is in it; this change is **not committed yet**.
 
+### 2026-11-08 — comments moved out of the code
+
+Client request: "move code comments to a dedicated section in claude file". All comments and docstrings of the
+Python, JS, SCSS and XML sources (tests included) were removed and collected in **"Code comments"** at the bottom of
+this file (136 notes, by file). Kept in the code: the license header line and `# noqa` pragmas. Code unchanged
+otherwise (diff = comment lines only): module updates cleanly, 59 tests pass, the three JS files pass `node --check`.
+The older log entries above quote some code comments in prose; that is fine, the section below is the full set.
+
 ## Design notes
 
 - **Notification = `activity_schedule`** on every validator (group `all_user_ids`), closed by
@@ -561,3 +570,191 @@ WebP conversion log entry's code is in it; this change is **not committed yet**.
   photo, so the badge is static text in the templates. `sale_order_id` stays as an optional link, it no
   longer drives anything.
 - **Rejection reason** is a plain optional field + a button, no wizard.
+
+## Code comments (moved out of the source)
+
+The source files carry **no comments or docstrings** (client request, 2026-11-08): 136 notes were taken out
+and live here. Only the one-line license header and lint pragmas (`# noqa: …`) stayed in the code. Each note is
+filed under its file, with the line of code it used to sit on or above (*near*), so it can be found by searching
+that code. **New code: put the explanation in this section, not in the source.**
+
+### `models/customer_photo.py`
+
+- *near* `class CustomerPhoto(models.Model):` — One submission: a customer, their photos, an optional review. Lifecycle: pending (just submitted, validators get an activity) -> approved (published on the website) or rejected (never shown).
+- *near* `class CustomerPhotoImage(models.Model):` — One photo of a submission. `image.mixin` gives the 1920/1024/512/256/128 variants. The related `website_published` is what lets `/web/image/<model>/<id>/image_512` serve approved photos to the public: website's `_can_return_content` grants read on binary fields when that field is True.
+- *near* `def _cron_purge_submitter_ip(self):` — The IP only serves the upload rate limit (minutes). Personal data: erase it after a day.
+- *near* `def _gallery_values(self, liked_ids=()):` — What the gallery card and the lightbox need, one dict per record. Everything the lightbox shows travels in the card (JSON in a data attribute), so there is no detail route. Call on sudo records of published submissions only.
+- *near* `partner_id = fields.Many2one('res.partner', string="Customer", index=True)` — No help= on the fields shown in the form: the back office wants no "?" tooltips. (Customer: set automatically when logged in. City: shown as "Client M'Confort – <city>".)
+- *near* `product_id = fields.Many2one('product.template', string="Product")` — Product fills the category (first-level shop category: Salon > Canapé gives Salon), which drives the website's filter chips; the category can still be changed by hand.
+- *near* `featured = fields.Boolean()` — featured ones come first in the home page block
+- *near* `@api.depends('firstname', 'lastname')` — [section] Computes
+- *near* `images = rec.image_ids.sorted(lambda i: (i.sequence, i.id or 0))` — Sort explicitly: right after creation the one2many cache keeps creation order.
+- *near* `roots = Categ.browse({int(c.parent_path.split('/')[0]) for c in rec.product_id.public_cate` — parent_path is "<root>/<child>/.../": its first id is the first-level ancestor. A product in several trees gets the first root in the shop's own category order.
+- *near* `@api.model_create_multi` — [section] CRUD
+- *near* `def _gallery_values(self, liked_ids=()):` — [section] Website
+- *near* `'product_url': rec.product_id.website_url if rec.product_id.is_published else '',` — Link only to a product the shop shows; an unpublished one would 404 for visitors.
+- *near* `def action_approve(self):` — [section] Actions
+- *near* `self.write({'state': 'rejected', 'is_published': False, 'featured': False})` — The reason is optional: a note for the team, never shown on the website.
+
+### `controllers/main.py`
+
+- *near* `def _is_accepted_photo(raw):` — JPEG, PNG, GIF (decoded by Pillow) or WebP (RIFF header with a readable size). Content decides, never the file name or the browser's mimetype.
+- *near* `def _webp_to_jpeg(raw):` — Re-encode a WebP upload as JPEG (or None if it cannot be read). Odoo does not resize WebP: stored as is, its 512 / 256 grid variants would be the 8 MB original, and a page of 24 of them would weigh ~190 MB. As a JPEG it is resized like any other photo, and its metadata is dropped. Odoo's startup leaves Pillow's WebP decoder unregistered, so load it here.
+- *near* `def submit(self, firstname='', lastname='', comment='', hp_url='', **kw):` — Public upload form. Answers JSON: {'ok': True} or {'error': code} with a 4xx status. CSRF stays on (the form posts `csrf_token`). The record lands as `pending`; creating it schedules a to-do for every validator.
+- *near* `def featured(self, limit=3):` — Photos for the home page block: featured ones first, then the latest. The caption is built here so it is translated by the server, not by the block's JS.
+- *near* `def like(self, photo_id):` — Toggle this browser session's like. One like per session, no partner tracking. # ponytail: session guard only; a like model (partner or ip) if abuse shows up.
+- *near* `MAX_PIXELS = 40_000_000` — decode limit for WebP (Odoo's own cap is 50 Mpx)
+- *near* `PHOTO_FORMATS = {'JPEG', 'PNG', 'GIF'}` — Decoded by Pillow, not trusted from the browser's mimetype: an SVG renamed to .png would be served back from /web/image with its scripts. Phones send JPEG; HEIC is not decodable here. Odoo restricts Pillow to its core formats at startup (tools/image.py: Image.preinit(), _initialized = 2), so Pillow cannot identify WebP in this process: WebP is checked on its RIFF header instead, the way Odoo itself does it (get_webp_size).
+- *near* `RATE_LIMIT = (5, timedelta(minutes=10))` — submissions per IP
+- *near* `published = [('is_published', '=', True), ('image_ids', '!=', False)]` — A published submission without any photo has nothing to show: leave it out.
+- *near* `groups = Photo._read_group(published, ['public_categ_id'], ['__count'])` — One chip per first-level shop category that has published photos, in the shop's own order.
+- *near* `url_args = {k: v for k, v in (('categ', categ), ('sort', sort)) if v not in ('all', 'recen` — Default values stay out of the URLs: one canonical address per view.
+- *near* `open_card = None` — Deep link (?open=<id>, see website_url): the photo may sit on another page or filter.
+- *near* `user = request.env.user` — Logged-in customer: prefill the upload form (a partner has one name field, split on the first space).
+- *near* `website = request.website` — Picture of the upload window, set in Website settings. bin_size: only ask whether there is one.
+- *near* `size = get_webp_size(raw)` — None for a variant it cannot read
+- *near* `except (IndexError, ValueError, UserError):` — truncated header
+- *near* `except Exception:` — noqa: BLE001 - not an image / decompression bomb: same answer
+- *near* `from PIL import WebPImagePlugin` — noqa: F401, PLC0415 - registers the decoder
+- *near* `frame = img.convert('RGBA')` — first frame of an animated WebP
+- *near* `flat = Image.new('RGB', frame.size, 'white')` — transparency becomes white
+- *near* `except Exception:` — noqa: BLE001 - corrupt file: same answer as any bad upload
+- *near* `if hp_url:` — honeypot: a human never sees that field
+- *near* `if raw[0:4] == b'RIFF':` — WebP (checked above): turn it into a regular JPEG
+- *near* `if Photo.search_count([('submitter_ip', '=', ip), ('create_date', '>', fields.Datetime.now` — ponytail: per IP and 10 minutes; a captcha if spam shows up. Behind a proxy that does not forward the client address every visitor shares one budget.
+
+### `security/security.xml`
+
+- *near* `<field name="implied_by_ids" eval="[(4, ref('base.group_system'))]"/>` — Administrators get it without a click; staff are added by hand in Settings ▸ Users.
+
+### `data/ir_cron_data.xml`
+
+- *near* `<record id="ir_cron_purge_submitter_ip" model="ir.cron">` — The visitor's IP is kept only for the upload rate limit (10 minutes); a daily job erases it.
+
+### `views/customer_photo_views.xml`
+
+- *near* `<field name="featured"/>` — every `record.<name>` used below must be declared here, or it is undefined in the browser
+- *near* `<menuitem id="menu_customer_photos" name="Customer Photos"` — [section] Website ▸ eCommerce ▸ Products section (client's choice). A first-level entry of the Website app would need children to be drawn (website navbar filters leaf sections).
+
+### `views/website_templates.xml`
+
+- *near* `<template id="icon_all" name="Customer Photos: all icon">` — Icons: sized by font-size (1em), coloured by currentColor.
+- *near* `<template id="gallery" name="Customer Photos Gallery">` — Gallery page
+- *near* `<t t-foreach="chips" t-as="chip">` — One chip per first-level shop category that has published photos.
+- *near* `<span class="o_mcp_categ_field">` — Phones: the chips are replaced by this select (hidden on desktop, where it still submits the current category along with the sort).
+- *near* `<img t-att-src="card['image']" t-att-alt="card['product'] or card['author']" loading="lazy` — Plain photo: verified badge, product and likes are in the lightbox the card opens.
+- *near* `<button type="button" class="o_mcp_open_upload o_mcp_cta_bar">` — Upload card: one slim bar on every screen size; the whole bar opens the upload window.
+- *near* `<div class="o_mcp_lightbox d-none" role="dialog" aria-modal="true" aria-labelledby="o_mcp_` — Lightbox. Static copy lives here (so it is translated like any view); gallery.js only fills the data-slot elements from the card's JSON.
+- *near* `<div class="o_mcp_upload d-none" role="dialog" aria-modal="true" aria-labelledby="o_mcp_up` — [section] Upload modal (lot 3). Same approach as the lightbox: static copy rendered here, gallery.js drives it and posts the files to /photos-clients/submit.
+- *near* `<div class="o_mcp_hp" aria-hidden="true"><input type="text" name="hp_url" tabindex="-1" au` — Honeypot: off-screen, skipped by keyboard and screen readers.
+
+### `views/snippets/s_customer_photos.xml`
+
+- *near* `<template id="s_customer_photos" name="Customer Photos">` — Home page block "Chez vous, avec M'Confort". Text and trust row are plain editable content; only the photo mosaic is filled by s_customer_photos.js from /photos-clients/featured.
+- *near* `<h2 class="s_cp_title"><span class="s_cp_line">At home,</span><span>with M'Confort</span><` — Two lines on desktop, one on phones: .s_cp_line is a block from lg up, an inline span with a gap below (no <br/>, whitespace next to it is stripped by translations)
+
+### `static/src/interactions/gallery.js`
+
+- *near* `const MAX_PHOTOS = 8;` — keep in step with controllers/main.py
+- *near* `const LIGHTBOX_FILL = 0.75;` — [section] Lightbox photo size between "whole photo" (0) and "cropped to fill the panel" (1). 0.75 = mostly filled, but zoomed out a bit so more of the photo shows; a thin dark band may appear on one side. Raise it to crop more.
+- *near* `export class CustomerPhotoGallery extends Interaction {` — /photos-clients: sort select, lightbox and likes. The lightbox markup (and its translated text) is rendered by the server in `gallery`; this only fills its `data-slot` elements from the card's JSON (`data-lightbox`), so there is no detail route.
+- *near* `".o_mcp_sort, .o_mcp_categ_select": { "t-on-change": this.onSortChange },` — The category select (phones) and the sort select share one form: either one reloads the page.
+- *near* `this.addListener(this.slot("image"), "load", () => this.fitImage());` — Size the lightbox photo each time one finishes loading.
+- *near* `if (this.el.dataset.open) {` — Deep link /photos-clients?open=<id>: the server sends the card even when it is on another page or filter.
+- *near* `onSortChange(ev) {` — [section] Handlers
+- *near* `const items = [...(uploading ? this.upload : this.lightbox).querySelectorAll(FOCUSABLE)];` — Keep focus inside the dialog while it is open.
+- *near* `get upload() {` — [section] Upload modal
+- *near* `ev.target.value = "";` — so choosing the same file again fires `change`
+- *near* `this.files.length = Math.min(this.files.length, MAX_PHOTOS);` — The server is the authority on size and count; this only keeps the form usable.
+- *near* `if (!form.firstname.value.trim() || !form.lastname.value.trim() || !this.files.length) {` — Same checks as the server's 'invalid', so the usual mistake needs no round trip.
+- *near* `const body = new FormData(form);` — the file input has no name: photos are added below
+- *near* `const data = await this.waitFor(response.json().catch(() => ({ error: "network" })));` — An oversized body is answered by the framework with HTML, not our JSON.
+- *near* `open(card, opener = null) {` — [section] Lightbox
+- *near* `this.fitImage();` — the panel has a size now (it was display: none while rendering)
+- *near* `fitImage() {` — Photo size: halfway-ish between "whole photo" and "cropped to fill the panel" (see LIGHTBOX_FILL), centred in the panel. Plain CSS cannot blend `contain` and `cover`.
+- *near* `const cardEl = this.el.querySelector('.o_mcp_card[data-id="${card.id}"]');` — Keep the card's data in step, so reopening it shows the new count and heart.
+- *near* `const product = this.slot("product");` — A link only when the shop shows that product; otherwise plain text.
+
+### `static/src/snippets/s_customer_photos/s_customer_photos.js`
+
+- *near* `export class CustomerPhotosSnippet extends Interaction {` — Home page block: fetches the featured photos and draws the mosaic next to the (editable) text column. With nothing to show the block hides itself on the public site; in the editor it keeps empty tiles so it can still be placed and configured.
+
+### `static/src/snippets/s_customer_photos/s_customer_photos.xml`
+
+- *near* `<t t-name="mconfort_customer_photos.FeaturedMosaic">` — No text of our own here: captions come translated from the server.
+
+### `static/src/website_builder/customer_photos_option.js`
+
+- *near* `export class CustomerPhotosSettingAction extends BuilderAction {` — Writes the setting on the block and restarts its interaction, so the mosaic is fetched and redrawn at once in the editor.
+
+### `static/src/scss/customer_photos.scss`
+
+- *near* `.o_mcp_gallery {` — Customer photos gallery (/photos-clients). Colours and shapes follow the client's mockups (odoo/mnt/_photo_mockup): navy / gold on a warm off-white.
+- *near* `.o_mcp_filters {` — ---- Filters Desktop: category chips on the left, sort on the right. Phones: the chips give way to two selects (category + sort) side by side, see the media query below.
+- *near* `.o_mcp_sort_field { display: inline-flex; align-items: center; gap: .5rem; }` — Each select comes with its label ("Category", "Sort by"). Desktop: label and select on one line.
+- *near* `.o_mcp_categ_field { display: none; }` — The category select is for phones. Hidden here it still submits its value (a hidden select does), so changing the sort on desktop keeps the current category.
+- *near* `.o_mcp_chips { display: none; }` — replaced by the select; also hidden from screen readers
+- *near* `.o_mcp_categ_field, .o_mcp_sort_field {` — Phones: the small caption sits above its select (a visible "index" for each field).
+- *near* `.o_mcp_card {` — ---- Cards
+- *near* `.o_mcp_lightbox {` — ---- Lightbox
+- *near* `z-index: 1055;` — Bootstrap modal level
+- *near* `width: unquote("min(1400px, 100%)");` — plain `min()` is evaluated by Sass: "Incompatible units"
+- *near* `.o_mcp_lb_media {` — Left column: the photo fills the whole panel (cropped to fit, `cover`), with the badge + like on top of it, the arrows on the sides and the thumbnails at the bottom.
+- *near* `flex: 2 1 600px;` — 600 + the details column's 380 fit a 1024 px window side by side; extra width goes 2:1 to the photo.
+- *near* `.o_mcp_lb_image {` — Centred; gallery.js sets its width / height (a little smaller than "cover"). Until then: plain cover.
+- *near* `.o_mcp_btn_primary {` — ---- Call to action + upload modal (lot 3)
+- *near* `&.has_image {` — Picture set in Website settings: cover it, keep the text readable with a navy fade at the bottom.
+- *near* `@media (max-width: 767.98px) { display: none; }` — the form is what matters on a phone
+- *near* `@media (max-width: 575.98px) {` — ---- Phones: plain photo cards + one slim upload bar (the client's screenshot) Tighter grid, rounder corners. (The cards are plain photos on every size: verified badge, product and likes live in the lightbox.)
+- *near* `.o_mcp_cta_bar {` — The upload card, identical on every screen size; the whole bar opens the upload window.
+- *near* `span { font-size: unquote("clamp(.6rem, 2.9vw, .78rem)"); color: var(--mcp-muted); white-s` — One line at any phone width (the text shrinks a little with the screen instead of wrapping)
+
+### `static/src/scss/s_customer_photos.scss`
+
+- *near* `.s_customer_photos {` — Home page block "Chez vous, avec M'Confort" (colours from the client's mockup).
+- *near* `.s_cp_title { font-size: 2.6rem; font-weight: 800; line-height: 1.1; @media (max-width: 57` — Phones: both fit on one line, as in the mobile mockup.
+- *near* `@media (min-width: 992px) { margin-top: 3.5rem !important; }` — Desktop: more air between the photos and the row. !important because the markup carries Bootstrap's `mt-4` (also on blocks already dropped on a page), which is !important itself.
+- *near* `@media (max-width: 575.98px) {` — Phones: the three items always share ONE row (icon + text side by side, as in the mockup). Equal thirds and no wrapping whatever the column classes of the markup (a block dropped before this rule has `col-12`), and the text scales with the screen so it still fits at 320 px.
+- *near* `@media (max-width: 991.98px) {` — ---- Phone and tablet: one column, in this order rule, title, subtitle, mosaic, trust row, button. The button sits in the text column on desktop, so that column and the first row dissolve (display: contents): their children become siblings of the trust row and `order` can move the button last, without a second copy of it to maintain.
+- *near* `.s_cp_line {` — First line of the title / subtitle: its own line on desktop, a word group followed by a gap otherwise.
+- *near* `.s_cp_mosaic {` — ---- Mosaic: one large tile + two small ones
+- *near* `grid-template-columns: 1.3fr 1fr;` — Same shape as desktop (large tile left, two stacked right), sized by ratio instead of pixels.
+
+### `tests/test_customer_photo.py`
+
+- *near* `self.assertGreaterEqual(set(todos.mapped('user_id')), {self.validator, self.validator_2})` — >= : administrators imply the group, so real users on mconfort get a todo too.
+- *near* `self.assertEqual(self._submission(product_id=self.sofa.id).public_categ_id, self.salon_roo` — Salon > Canapé gives Salon; a product directly in a root category gives that root
+- *near* `self.assertFalse(self._submission(product_id=self.lamp.id).public_categ_id)` — no category on the product, or no product: none
+- *near* `import re` — `record.<name>.raw_value` is undefined in the browser unless <field name="<name>"/> is in the arch: the card then crashes (OwlError) as soon as one record exists.
+- *near* `self.env.cr.execute("UPDATE mconfort_customer_photo SET create_date = %s WHERE id = %s",` — create_date is set by the ORM: backdate it in SQL (with the Python clock, PG's is not UTC here)
+- *near* `photo = self._submission()` — Without ?download=true /web/image hides access errors behind the placeholder image (200), with it the access error becomes a 404.
+
+### `tests/test_controllers.py`
+
+- *near* `class TestGallery(HttpCase, Common):` — Public gallery: the mconfort db already holds real submissions, so assertions are relative (our records' position, ORM counts), never absolute.
+- *near* `class TestSubmit(HttpCase, Common):` — /photos-clients/submit. Each test posts a unique last name, so it finds its own record in a database that already holds real ones.
+- *near* `class TestFeatured(HttpCase, Common):` — /photos-clients/featured feeds the home page block.
+- *near* `class TestUploadPicture(HttpCase, Common):` — Picture of the upload window, set in Website settings.
+- *near* `def test_webp_is_stored_as_a_small_resized_jpeg(self):` — Odoo does not resize WebP; kept as is, its 512 / 256 variants would be the original file.
+- *near* `self.assertTrue(chips["/photos-clients"].endswith(f"({Photo.search_count(PUBLISHED)})"), c` — The visitor sees the site's language ("Toutes", not "All"): compare counts, not the "All" label. One chip per first-level category that has published photos.
+- *near* `self.assertNotIn(f'/photos-clients?categ={empty_root.id}', chips)` — a category nobody photographed gets no chip, and sub-categories never do
+- *near* `self.assertEqual([o.get('value') for o in options], ['all'] + chip_ids)` — "All" first, then the same categories as the chips, in the same order
+- *near* `self.assertEqual(len(form.xpath('.//label[@for="o_mcp_categ"]')), 1)` — each select has a visible caption ("index") on phones
+- *near* `self.assertEqual(form.xpath('.//select[@name="sort"]/option[@selected]/@value'), ['likes']` — the sort select is in the same form, so changing either one keeps the other
+- *near* `form = self._doc('/photos-clients').xpath('//form[contains(@class, "o_mcp_sortform")]')[0]` — without a filter "All" is the selected option
+- *near* `self.assertEqual(len(crumbs), 2)` — "Accueil", "Photos clients" (no icon)
+- *near* `bar = doc.xpath('//button[contains(@class, "o_mcp_cta_bar")]')` — One upload card, the same slim bar on every screen size: no separate desktop banner any more
+- *near* `self.assertFalse(card.xpath('.//*[contains(@class, "o_mcp_pill")]'))` — no verified badge, product name or like count painted on the card, on any screen size
+- *near* `lightbox = doc.xpath('//div[contains(@class, "o_mcp_lightbox")]')[0]` — ...they are in the lightbox the card opens
+- *near* `self.assertIn(photo.id, self._card_ids(f'/photos-clients?categ={self.salon_child.id}'))` — an id that is not a chip (a sub-category, or an old ?categ=salon link) shows everything
+- *near* `bare = self._approved()` — no product at all: no link either
+- *near* `self.assertTrue(photo.activity_ids)` — a validator is told
+- *near* `eleven_minutes_ago = fields.Datetime.now() - timedelta(minutes=11)` — Python clock, not SQL now(): the PG session here is not on UTC.
+- *near* `WEBP_LOSSY = base64.b64decode(` — Real 48x32 WebP files made with a stock Pillow: Odoo restricts the Pillow in its own process to JPEG / PNG / GIF / BMP, so a test cannot write WebP itself.
+- *near* `tiff_header = b'II*\x00\x08\x00\x00\x00' + b'\x00' * 64` — Odoo's Pillow cannot read TIFF at all
+- *near* `from PIL import Image, WebPImagePlugin` — noqa: F401 - the decoder / encoder are not loaded by default
+- *near* `noise = Image.frombytes('RGB', (360, 240), bytes(rnd.randrange(256) for _ in range(360 * 2` — 3600x2400 noisy picture: a heavy WebP, far above the 1920 px a photo is stored at
+- *near* `self.assertEqual(data[:3], b'\xff\xd8\xff', f"{field} is not a JPEG")` — no longer a WebP
+- *near* `self.assertLess(len(base64.b64decode(image.image_512)), len(webp) / 4)` — grid size is small
+- *near* `self.assertEqual(self._post(photos=[('holiday.jpg', self.WEBP_LOSSY)]).status_code, 200)` — a real WebP sent as ".jpg" is fine; text or a truncated WebP header sent as ".webp" is not
+- *near* `self.assertEqual([i for i in ids if i in (oldest_featured.id, newer.id, older.id)],` — `featured` jumps the queue, then newest first. Six slots: ours fit even if the db has a few.

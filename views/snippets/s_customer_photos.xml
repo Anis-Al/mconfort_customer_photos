@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Home page block "Chez vous, avec M'Confort". Text and trust row are plain editable
-         content; only the photo mosaic is filled by s_customer_photos.js from /photos-clients/featured. -->
     <template id="s_customer_photos" name="Customer Photos">
         <section class="s_customer_photos pt48 pb48" data-snippet="s_customer_photos" data-name="Customer Photos" data-limit="3">
             <div class="container">
                 <div class="row align-items-center g-4 g-lg-5">
                     <div class="col-lg-4">
-                        <!-- Two lines on desktop, one on phones: .s_cp_line is a block from lg up, an inline
-                             span with a gap below (no <br/>, whitespace next to it is stripped by translations) -->
                         <h2 class="s_cp_title"><span class="s_cp_line">At home,</span><span>with M'Confort</span></h2>
                         <p class="s_cp_subtitle"><span class="s_cp_line">Our customers share</span><span>their interiors.</span></p>
                         <div class="s_cp_rule" role="separator"/>

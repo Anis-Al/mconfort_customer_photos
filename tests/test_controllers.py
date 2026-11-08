@@ -21,9 +21,6 @@ PUBLISHED = [('is_published', '=', True), ('image_ids', '!=', False)]
 
 @tagged('post_install', '-at_install')
 class TestGallery(HttpCase, Common):
-    """Public gallery: the mconfort db already holds real submissions, so assertions are
-    relative (our records' position, ORM counts), never absolute."""
-
     def _approved(self, **vals):
         photo = self._submission(**vals)
         photo.action_approve()
@@ -60,13 +57,10 @@ class TestGallery(HttpCase, Common):
         chips = {}
         for chip in self._doc('/photos-clients').xpath('//a[contains(@class, "o_mcp_chip")]'):
             chips[chip.get('href')] = ' '.join(chip.text_content().split())
-        # The visitor sees the site's language ("Toutes", not "All"): compare counts, not the "All" label.
-        # One chip per first-level category that has published photos.
         self.assertTrue(chips["/photos-clients"].endswith(f"({Photo.search_count(PUBLISHED)})"), chips)
         for root in (self.salon_root, self.dining_root):
             expected = f"{root.name} ({Photo.search_count(PUBLISHED + [('public_categ_id', '=', root.id)])})"
             self.assertEqual(chips[f'/photos-clients?categ={root.id}'], expected)
-        # a category nobody photographed gets no chip, and sub-categories never do
         self.assertNotIn(f'/photos-clients?categ={empty_root.id}', chips)
         self.assertNotIn(f'/photos-clients?categ={self.salon_child.id}', chips)
 
@@ -78,25 +72,20 @@ class TestGallery(HttpCase, Common):
         options = form.xpath('.//select[@name="categ"]/option')
         chip_ids = [h.split('categ=')[1].split('&')[0]
                     for h in doc.xpath('//a[contains(@class, "o_mcp_chip")]/@href') if 'categ=' in h]
-        # "All" first, then the same categories as the chips, in the same order
         self.assertEqual([o.get('value') for o in options], ['all'] + chip_ids)
         self.assertEqual([o.get('value') for o in options if o.get('selected') is not None], [str(self.salon_root.id)])
-        # each select has a visible caption ("index") on phones
         self.assertEqual(len(form.xpath('.//label[@for="o_mcp_categ"]')), 1)
         self.assertEqual(len(form.xpath('.//label[@for="o_mcp_sort"]')), 1)
-        # the sort select is in the same form, so changing either one keeps the other
         self.assertEqual(form.xpath('.//select[@name="sort"]/option[@selected]/@value'), ['likes'])
-        # without a filter "All" is the selected option
         form = self._doc('/photos-clients').xpath('//form[contains(@class, "o_mcp_sortform")]')[0]
         self.assertEqual(form.xpath('.//select[@name="categ"]/option[@selected]/@value'), ['all'])
 
     def test_breadcrumb_and_the_single_upload_bar(self):
         doc = self._doc('/photos-clients')
         crumbs = doc.xpath('//ol[contains(@class, "o_mcp_breadcrumb")]/li')
-        self.assertEqual(len(crumbs), 2)                                  # "Accueil", "Photos clients" (no icon)
+        self.assertEqual(len(crumbs), 2)
         self.assertEqual(crumbs[0].xpath('./a/@href'), ['/'])
         self.assertFalse(doc.xpath('//ol[contains(@class, "o_mcp_breadcrumb")]//i[contains(@class, "fa-home")]'))
-        # One upload card, the same slim bar on every screen size: no separate desktop banner any more
         bar = doc.xpath('//button[contains(@class, "o_mcp_cta_bar")]')
         self.assertEqual(len(bar), 1)
         self.assertNotIn('d-sm-none', bar[0].get('class'))
@@ -110,12 +99,10 @@ class TestGallery(HttpCase, Common):
         doc = self._doc('/photos-clients')
         card = doc.xpath(f'//a[@data-id="{photo.id}"]')[0]
         self.assertTrue(card.xpath('.//img'))
-        # no verified badge, product name or like count painted on the card, on any screen size
         self.assertFalse(card.xpath('.//*[contains(@class, "o_mcp_pill")]'))
         self.assertFalse(card.xpath('.//figcaption'))
         self.assertNotIn("Salon LEXUS", card.text_content())
         self.assertNotIn("purchase", card.text_content().lower())
-        # ...they are in the lightbox the card opens
         lightbox = doc.xpath('//div[contains(@class, "o_mcp_lightbox")]')[0]
         self.assertTrue(lightbox.xpath('.//*[contains(@class, "o_mcp_pill_verified")]'))
         self.assertTrue(lightbox.xpath('.//*[@data-slot="product"]'))
@@ -141,7 +128,6 @@ class TestGallery(HttpCase, Common):
     def test_unknown_filter_and_sort_fall_back(self):
         photo = self._approved()
         self.assertIn(photo.id, self._card_ids('/photos-clients?categ=nope&sort=nope'))
-        # an id that is not a chip (a sub-category, or an old ?categ=salon link) shows everything
         self.assertIn(photo.id, self._card_ids(f'/photos-clients?categ={self.salon_child.id}'))
         self.assertIn(photo.id, self._card_ids('/photos-clients?categ=salon'))
 
@@ -188,7 +174,6 @@ class TestGallery(HttpCase, Common):
         self.assertTrue(card()['product_url'].startswith('/shop/'))
         self.sofa.is_published = False
         self.assertEqual(card()['product_url'], '')
-        # no product at all: no link either
         bare = self._approved()
         data = json.loads(self._doc('/photos-clients').xpath(f'//a[@data-id="{bare.id}"]/@data-lightbox')[0])
         self.assertEqual(data['product_url'], '')
@@ -207,9 +192,6 @@ class TestGallery(HttpCase, Common):
 
 @tagged('post_install', '-at_install')
 class TestSubmit(HttpCase, Common):
-    """/photos-clients/submit. Each test posts a unique last name, so it finds its own record
-    in a database that already holds real ones."""
-
     LAST = "Zxqtest"
 
     def _csrf(self):
@@ -235,7 +217,6 @@ class TestSubmit(HttpCase, Common):
         self.assertEqual(photo.image_ids.mapped('sequence'), [0, 1])
         self.assertEqual(photo.submitter_ip, '127.0.0.1')
         self.assertFalse(photo.partner_id)
-        # a validator is told
         self.assertTrue(photo.activity_ids)
 
     def test_pending_submission_stays_off_the_gallery(self):
@@ -304,7 +285,6 @@ class TestSubmit(HttpCase, Common):
         old = self.env['mconfort.customer.photo']
         for _i in range(5):
             old |= self._submission(submitter_ip='127.0.0.1')
-        # Python clock, not SQL now(): the PG session here is not on UTC.
         eleven_minutes_ago = fields.Datetime.now() - timedelta(minutes=11)
         self.env.cr.execute("UPDATE mconfort_customer_photo SET create_date = %s WHERE id IN %s", [eleven_minutes_ago, tuple(old.ids)])
         old.invalidate_recordset()
@@ -323,8 +303,6 @@ class TestSubmit(HttpCase, Common):
         photo = self.env['mconfort.customer.photo'].search([('lastname', '=', "Boinali")])
         self.assertEqual(photo.partner_id, user.partner_id)
 
-    # Real 48x32 WebP files made with a stock Pillow: Odoo restricts the Pillow in its own process to
-    # JPEG / PNG / GIF / BMP, so a test cannot write WebP itself.
     WEBP_LOSSY = base64.b64decode(
         "UklGRvIBAABXRUJQVlA4IOYBAABwDACdASowACAAPm00lUgkIqIhJWmYgA2JbACxHv/zf4B+NPEH7gHiKbgD9eP1y7AHoAdIBz6Xsa/uB+s3s5ZhKfABqiH875Avk72A/013xb9o1CsPWPmAhrs96ailI77BxiYf7dxXGWEk4gAA/rE+2Obn/2nxngDy3GfonzhmmymENLhdRq9fsLIu8YaV262e3xz//zr6mM5XY3mo91a//7DP1gP0uuQu+9hnYT/n9afidT0tknfFdcOL7oebn02mVbKQ//MWiDvwbJb77OSFcedY0o2Fu1XQEtlLeP0j1fwB/b/XleIq04unffTz/utsoxMChbX5Nny/Uhxy/otCbtNs/gnb5Z8mPuPSZqZEtCj2L830gKogvXdw2sz2vl+/Pl8e8nnZfjOEY4oI5UfJ0N5XjPW5qxqU4P3vDZ17I5R8v+v/5/w92/o4cD1BF5DTFffJGrPsYpPjvb9xO/GPOOD6G0P3hxyyj63uux3r0LLQVDbB/5N/m2Q6oggEcezIOAvJiIZ4AcCtR14jhgacBya/mAMfy++TKCfMNJMdAW0N7sTYXdy2yFhvoIjcBLGr0jo+m/WEsKSzqnfzax0oS2MrsdKvyG5P1pfWXvrYVW+YjkEUtZo/brffupGh0Zp5sfAAAAA=")
     WEBP_LOSSLESS = base64.b64decode(
@@ -350,19 +328,17 @@ class TestSubmit(HttpCase, Common):
             self.assertTrue(photo.image_ids.image_512, label)
 
     def test_other_image_formats_are_refused(self):
-        tiff_header = b'II*\x00\x08\x00\x00\x00' + b'\x00' * 64   # Odoo's Pillow cannot read TIFF at all
+        tiff_header = b'II*\x00\x08\x00\x00\x00' + b'\x00' * 64
         for label, raw in (('BMP', self._raw('BMP')), ('TIFF', tiff_header)):
             response = self._post(photos=[(f'a.{label.lower()}', raw)])
             self.assertEqual((label, response.status_code, response.json()), (label, 400, {'error': 'file'}))
         self.assertFalse(self._created())
 
     def test_webp_is_stored_as_a_small_resized_jpeg(self):
-        """Odoo does not resize WebP; kept as is, its 512 / 256 variants would be the original file."""
         import io
         import random
-        from PIL import Image, WebPImagePlugin  # noqa: F401 - the decoder / encoder are not loaded by default
+        from PIL import Image, WebPImagePlugin  # noqa: F401
         rnd = random.Random(1)
-        # 3600x2400 noisy picture: a heavy WebP, far above the 1920 px a photo is stored at
         noise = Image.frombytes('RGB', (360, 240), bytes(rnd.randrange(256) for _ in range(360 * 240 * 3)))
         big = noise.resize((3600, 2400))
         buf = io.BytesIO()
@@ -374,9 +350,9 @@ class TestSubmit(HttpCase, Common):
         image = self._created().image_ids
         for field in ('image_1920', 'image_512', 'image_256'):
             data = base64.b64decode(image[field])
-            self.assertEqual(data[:3], b'\xff\xd8\xff', f"{field} is not a JPEG")   # no longer a WebP
+            self.assertEqual(data[:3], b'\xff\xd8\xff', f"{field} is not a JPEG")
         self.assertLessEqual(max(Image.open(io.BytesIO(base64.b64decode(image.image_1920))).size), 1920)
-        self.assertLess(len(base64.b64decode(image.image_512)), len(webp) / 4)   # grid size is small
+        self.assertLess(len(base64.b64decode(image.image_512)), len(webp) / 4)
 
     def test_webp_with_transparency_and_animation_is_accepted(self):
         import io
@@ -388,7 +364,6 @@ class TestSubmit(HttpCase, Common):
         self.assertTrue(self._created().image_ids.image_512)
 
     def test_extension_and_mimetype_do_not_matter_only_the_content(self):
-        # a real WebP sent as ".jpg" is fine; text or a truncated WebP header sent as ".webp" is not
         self.assertEqual(self._post(photos=[('holiday.jpg', self.WEBP_LOSSY)]).status_code, 200)
         for name, raw in (('fake.webp', b'not an image'), ('cut.webp', self.WEBP_LOSSY[:15]), ('cut2.webp', self.WEBP_LOSSY[:20])):
             response = self._post(photos=[(name, raw)], lastname=self.LAST + 'x')
@@ -398,8 +373,6 @@ class TestSubmit(HttpCase, Common):
 
 @tagged('post_install', '-at_install')
 class TestFeatured(HttpCase, Common):
-    """/photos-clients/featured feeds the home page block."""
-
     def _featured(self, **params):
         return self.make_jsonrpc_request('/photos-clients/featured', params)
 
@@ -415,7 +388,6 @@ class TestFeatured(HttpCase, Common):
         pending = self._submission()
         ids = [p['id'] for p in self._featured(limit=6)]
         self.assertNotIn(pending.id, ids)
-        # `featured` jumps the queue, then newest first. Six slots: ours fit even if the db has a few.
         self.assertEqual([i for i in ids if i in (oldest_featured.id, newer.id, older.id)],
                          [oldest_featured.id, newer.id, older.id])
 
@@ -446,8 +418,6 @@ class TestFeatured(HttpCase, Common):
 
 @tagged('post_install', '-at_install')
 class TestUploadPicture(HttpCase, Common):
-    """Picture of the upload window, set in Website settings."""
-
     def _aside(self):
         page = html.fromstring(self.url_open('/photos-clients').content)
         return page.xpath('//aside[contains(@class, "o_mcp_up_aside")]')[0]

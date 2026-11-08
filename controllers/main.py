@@ -16,14 +16,9 @@ from odoo.tools.image import get_webp_size
 
 MAX_PHOTOS = 8
 MAX_PHOTO_BYTES = 8 * 1024 * 1024
-MAX_PIXELS = 40_000_000  # decode limit for WebP (Odoo's own cap is 50 Mpx)
-# Decoded by Pillow, not trusted from the browser's mimetype: an SVG renamed to .png would be
-# served back from /web/image with its scripts. Phones send JPEG; HEIC is not decodable here.
-# Odoo restricts Pillow to its core formats at startup (tools/image.py: Image.preinit(), _initialized = 2),
-# so Pillow cannot identify WebP in this process: WebP is checked on its RIFF header instead, the way Odoo
-# itself does it (get_webp_size).
+MAX_PIXELS = 40_000_000
 PHOTO_FORMATS = {'JPEG', 'PNG', 'GIF'}
-RATE_LIMIT = (5, timedelta(minutes=10))   # submissions per IP
+RATE_LIMIT = (5, timedelta(minutes=10))
 SORTS = {
     'recent': 'submitted_on desc, id desc',
     'likes': 'like_count desc, submitted_on desc, id desc',
@@ -39,10 +34,8 @@ class CustomerPhotos(http.Controller):
     def gallery(self, page=1, categ='all', sort='recent', open=0, **kw):
         Photo = request.env['mconfort.customer.photo'].sudo()
         sort = sort if sort in SORTS else 'recent'
-        # A published submission without any photo has nothing to show: leave it out.
         published = [('is_published', '=', True), ('image_ids', '!=', False)]
 
-        # One chip per first-level shop category that has published photos, in the shop's own order.
         groups = Photo._read_group(published, ['public_categ_id'], ['__count'])
         total_all = sum(count for _categ, count in groups)
         chips = sorted(((c, n) for c, n in groups if c), key=lambda g: (g[0].sequence, g[0].id))
@@ -56,7 +49,6 @@ class CustomerPhotos(http.Controller):
 
         chips = [{'id': c.id, 'name': c.name, 'count': n, 'url': chip_url(c.id)} for c, n in chips]
         all_url = chip_url('all')
-        # Default values stay out of the URLs: one canonical address per view.
         url_args = {k: v for k, v in (('categ', categ), ('sort', sort)) if v not in ('all', 'recent')}
         pager = request.website.pager(url='/photos-clients', total=Photo.search_count(domain),
                                       page=page, step=self._per_page, url_args=url_args)
@@ -67,18 +59,15 @@ class CustomerPhotos(http.Controller):
         for card in cards:
             card['json'] = json.dumps(card)
 
-        # Deep link (?open=<id>, see website_url): the photo may sit on another page or filter.
         open_card = None
         if str(open).isdigit() and int(open):
             target = Photo.search(published + [('id', '=', int(open))])
             if target:
                 open_card = json.dumps(target._gallery_values(liked)[0])
 
-        # Logged-in customer: prefill the upload form (a partner has one name field, split on the first space).
         user = request.env.user
         first, _sep, last = ('' if user._is_public() else user.partner_id.name or '').partition(' ')
 
-        # Picture of the upload window, set in Website settings. bin_size: only ask whether there is one.
         website = request.website
         has_image = website.sudo().with_context(bin_size=True).customer_photos_upload_image
         upload_image = website.image_url(website, 'customer_photos_upload_image', '800x1100') if has_image else False
@@ -99,49 +88,38 @@ class CustomerPhotos(http.Controller):
 
     @staticmethod
     def _is_accepted_photo(raw):
-        """JPEG, PNG, GIF (decoded by Pillow) or WebP (RIFF header with a readable size). Content
-        decides, never the file name or the browser's mimetype."""
         if raw[0:4] == b'RIFF' and raw[8:15] == b'WEBPVP8':
             try:
-                size = get_webp_size(raw)  # None for a variant it cannot read
-            except (IndexError, ValueError, UserError):  # truncated header
+                size = get_webp_size(raw)
+            except (IndexError, ValueError, UserError):
                 return False
             return bool(size and size[0] > 0 and size[1] > 0)
         try:
             with Image.open(io.BytesIO(raw)) as img:
                 return img.format in PHOTO_FORMATS
-        except Exception:  # noqa: BLE001 - not an image / decompression bomb: same answer
+        except Exception:  # noqa: BLE001
             return False
 
     @staticmethod
     def _webp_to_jpeg(raw):
-        """Re-encode a WebP upload as JPEG (or None if it cannot be read).
-
-        Odoo does not resize WebP: stored as is, its 512 / 256 grid variants would be the 8 MB original, and
-        a page of 24 of them would weigh ~190 MB. As a JPEG it is resized like any other photo, and its
-        metadata is dropped. Odoo's startup leaves Pillow's WebP decoder unregistered, so load it here."""
-        from PIL import WebPImagePlugin  # noqa: F401, PLC0415 - registers the decoder
+        from PIL import WebPImagePlugin  # noqa: F401, PLC0415
         try:
             with Image.open(io.BytesIO(raw)) as img:
                 if img.width * img.height > MAX_PIXELS:
                     return None
-                frame = img.convert('RGBA')  # first frame of an animated WebP
-            flat = Image.new('RGB', frame.size, 'white')  # transparency becomes white
+                frame = img.convert('RGBA')
+            flat = Image.new('RGB', frame.size, 'white')
             flat.paste(frame, mask=frame.getchannel('A'))
             out = io.BytesIO()
             flat.save(out, format='JPEG', quality=88, optimize=True)
             return out.getvalue()
-        except Exception:  # noqa: BLE001 - corrupt file: same answer as any bad upload
+        except Exception:  # noqa: BLE001
             return None
 
     @http.route('/photos-clients/submit', type='http', auth='public', website=True, methods=['POST'],
                 max_content_length=MAX_PHOTOS * MAX_PHOTO_BYTES)
     def submit(self, firstname='', lastname='', comment='', hp_url='', **kw):
-        """Public upload form. Answers JSON: {'ok': True} or {'error': code} with a 4xx status.
-
-        CSRF stays on (the form posts `csrf_token`). The record lands as `pending`; creating it
-        schedules a to-do for every validator."""
-        if hp_url:  # honeypot: a human never sees that field
+        if hp_url:
             return request.make_json_response({'ok': True})
         firstname, lastname = firstname.strip()[:60], lastname.strip()[:60]
         files = [f for f in request.httprequest.files.getlist('photos') if f.filename]
@@ -157,7 +135,7 @@ class CustomerPhotos(http.Controller):
                 return request.make_json_response({'error': 'file'}, status=400)
             if not self._is_accepted_photo(raw):
                 return request.make_json_response({'error': 'file'}, status=400)
-            if raw[0:4] == b'RIFF':  # WebP (checked above): turn it into a regular JPEG
+            if raw[0:4] == b'RIFF':
                 raw = self._webp_to_jpeg(raw)
                 if not raw:
                     return request.make_json_response({'error': 'file'}, status=400)
@@ -166,8 +144,6 @@ class CustomerPhotos(http.Controller):
         Photo = request.env['mconfort.customer.photo'].sudo()
         ip = request.httprequest.remote_addr
         limit, window = RATE_LIMIT
-        # ponytail: per IP and 10 minutes; a captcha if spam shows up. Behind a proxy that does not
-        # forward the client address every visitor shares one budget.
         if Photo.search_count([('submitter_ip', '=', ip), ('create_date', '>', fields.Datetime.now() - window)]) >= limit:
             return request.make_json_response({'error': 'rate'}, status=429)
 
@@ -188,8 +164,6 @@ class CustomerPhotos(http.Controller):
 
     @http.route('/photos-clients/featured', type='jsonrpc', auth='public', website=True, readonly=True)
     def featured(self, limit=3):
-        """Photos for the home page block: featured ones first, then the latest. The caption
-        is built here so it is translated by the server, not by the block's JS."""
         limit = limit if isinstance(limit, int) and 1 <= limit <= 6 else 3
         photos = request.env['mconfort.customer.photo'].sudo().search(
             [('is_published', '=', True), ('image_ids', '!=', False)],
@@ -205,9 +179,6 @@ class CustomerPhotos(http.Controller):
 
     @http.route('/photos-clients/like', type='jsonrpc', auth='public', website=True)
     def like(self, photo_id):
-        """Toggle this browser session's like. One like per session, no partner tracking.
-
-        # ponytail: session guard only; a like model (partner or ip) if abuse shows up."""
         photo = request.env['mconfort.customer.photo'].sudo().search(
             [('id', '=', photo_id if isinstance(photo_id, int) else 0), ('is_published', '=', True)])
         if not photo:

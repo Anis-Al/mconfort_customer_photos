@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <!-- No text of our own here: captions come translated from the server. -->
     <t t-name="mconfort_customer_photos.FeaturedMosaic">
         <div t-attf-class="s_cp_mosaic s_cp_mosaic_n{{photos.length}}">
             <t t-foreach="photos" t-as="photo" t-key="photo_index">

@@ -30,7 +30,6 @@
         <field name="arch" type="xml">
             <kanban default_group_by="state" quick_create="false" sample="1">
                 <field name="state"/>
-                <!-- every `record.<name>` used below must be declared here, or it is undefined in the browser -->
                 <field name="featured"/>
                 <templates>
                     <t t-name="card" class="flex-row">
@@ -159,8 +158,6 @@
         </field>
     </record>
 
-    <!-- Website ▸ eCommerce ▸ Products section (client's choice). A first-level entry of the
-         Website app would need children to be drawn (website navbar filters leaf sections). -->
     <menuitem id="menu_customer_photos" name="Customer Photos"
               parent="website_sale.menu_catalog" sequence="25"
               action="action_customer_photo" groups="mconfort_customer_photos.group_manager"/>

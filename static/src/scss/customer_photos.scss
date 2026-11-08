@@ -1,5 +1,3 @@
-// Customer photos gallery (/photos-clients). Colours and shapes follow the client's mockups
-// (odoo/mnt/_photo_mockup): navy / gold on a warm off-white.
 
 .o_mcp_gallery {
     --mcp-navy: #14234A;
@@ -38,9 +36,6 @@
         margin-bottom: 0;
     }
 
-    // ---- Filters ---------------------------------------------------------
-    // Desktop: category chips on the left, sort on the right. Phones: the chips give way to two selects
-    // (category + sort) side by side, see the media query below.
     .o_mcp_filters {
         display: flex;
         flex-wrap: wrap;
@@ -72,7 +67,6 @@
         &:hover:not(.active) { background: rgba(20, 35, 74, .06); }
     }
     .o_mcp_sortform { display: inline-flex; align-items: center; gap: .5rem; margin: 0; }
-    // Each select comes with its label ("Category", "Sort by"). Desktop: label and select on one line.
     .o_mcp_sort_field { display: inline-flex; align-items: center; gap: .5rem; }
     .o_mcp_field_label { margin: 0; color: var(--mcp-muted); white-space: nowrap; }
     .o_mcp_sort, .o_mcp_categ_select {
@@ -81,19 +75,16 @@
         border-color: #CFC8B8;
         padding-inline: 1rem 2.2rem;
     }
-    // The category select is for phones. Hidden here it still submits its value (a hidden select does),
-    // so changing the sort on desktop keeps the current category.
     .o_mcp_categ_field { display: none; }
 
     @media (max-width: 575.98px) {
         .o_mcp_filters { display: block; margin-top: 1.25rem; }
-        .o_mcp_chips { display: none; }   // replaced by the select; also hidden from screen readers
+        .o_mcp_chips { display: none; }
         .o_mcp_sortform {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: .5rem;
         }
-        // Phones: the small caption sits above its select (a visible "index" for each field).
         .o_mcp_categ_field, .o_mcp_sort_field {
             display: flex;
             flex-direction: column;
@@ -111,7 +102,6 @@
         }
     }
 
-    // ---- Cards -----------------------------------------------------------
     .o_mcp_card {
         display: block;
         color: inherit;
@@ -158,11 +148,10 @@
     }
     label[for="o_mcp_sort"] { white-space: nowrap; }
 
-    // ---- Lightbox --------------------------------------------------------
     .o_mcp_lightbox {
         position: fixed;
         inset: 0;
-        z-index: 1055; // Bootstrap modal level
+        z-index: 1055;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -174,18 +163,15 @@
         position: relative;
         display: flex;
         flex-wrap: wrap;
-        width: unquote("min(1400px, 100%)"); // plain `min()` is evaluated by Sass: "Incompatible units"
+        width: unquote("min(1400px, 100%)");
         max-height: 100%;
         overflow-y: auto;
         border-radius: 28px;
         background: #fff;
         box-shadow: 0 24px 60px rgba(0, 0, 0, .22);
     }
-    // Left column: the photo fills the whole panel (cropped to fit, `cover`), with the badge + like on top of
-    // it, the arrows on the sides and the thumbnails at the bottom.
     .o_mcp_lb_media {
         position: relative;
-        // 600 + the details column's 380 fit a 1024 px window side by side; extra width goes 2:1 to the photo.
         flex: 2 1 600px;
         min-width: 0;
         min-height: 380px;
@@ -193,7 +179,6 @@
         @media (min-width: 992px) { min-height: 700px; }
     }
     .o_mcp_lb_stage { position: absolute; inset: 0; overflow: hidden; }
-    // Centred; gallery.js sets its width / height (a little smaller than "cover"). Until then: plain cover.
     .o_mcp_lb_image {
         position: absolute;
         left: 50%;
@@ -363,7 +348,6 @@
         .fa { font-size: 1.75rem; color: var(--mcp-gold); }
     }
 
-    // ---- Call to action + upload modal (lot 3) ---------------------------
     .o_mcp_btn_primary {
         display: inline-flex;
         align-items: center;
@@ -416,7 +400,6 @@
         .fa { font-size: 2.75rem; }
         strong { font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
         .o_mcp_up_aside_text { font-size: .8rem; line-height: 1.45; }
-        // Picture set in Website settings: cover it, keep the text readable with a navy fade at the bottom.
         &.has_image {
             position: relative;
             background-color: var(--mcp-navy);
@@ -430,7 +413,7 @@
             }
             > * { position: relative; }
         }
-        @media (max-width: 767.98px) { display: none; } // the form is what matters on a phone
+        @media (max-width: 767.98px) { display: none; }
     }
     .o_mcp_up_main {
         position: relative;
@@ -531,14 +514,10 @@
     }
     .o_mcp_thanks { padding: 2rem 0; &:focus { outline: none; } }
 
-    // ---- Phones: plain photo cards + one slim upload bar (the client's screenshot) -----------------
-    // Tighter grid, rounder corners. (The cards are plain photos on every size: verified badge, product
-    // and likes live in the lightbox.)
     @media (max-width: 575.98px) {
         .o_mcp_grid { --bs-gutter-x: .75rem; --bs-gutter-y: .75rem; }
         .o_mcp_figure { border-radius: 14px; }
     }
-    // The upload card, identical on every screen size; the whole bar opens the upload window.
     .o_mcp_cta_bar {
         display: flex;
         align-items: center;
@@ -560,7 +539,6 @@
         min-width: 0;
         line-height: 1.3;
         strong { font-size: .95rem; font-weight: 700; }
-        // One line at any phone width (the text shrinks a little with the screen instead of wrapping)
         span { font-size: unquote("clamp(.6rem, 2.9vw, .78rem)"); color: var(--mcp-muted); white-space: nowrap; }
     }
 

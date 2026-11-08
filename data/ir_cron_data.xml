@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
-    <!-- The visitor's IP is kept only for the upload rate limit (10 minutes); a daily job erases it. -->
     <record id="ir_cron_purge_submitter_ip" model="ir.cron">
         <field name="name">Customer Photos: erase submitter IPs</field>
         <field name="model_id" ref="model_mconfort_customer_photo"/>

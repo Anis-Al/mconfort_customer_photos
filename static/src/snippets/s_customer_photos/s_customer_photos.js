@@ -3,11 +3,6 @@ import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 import { renderToElement } from "@web/core/utils/render";
 
-/**
- * Home page block: fetches the featured photos and draws the mosaic next to the
- * (editable) text column. With nothing to show the block hides itself on the public
- * site; in the editor it keeps empty tiles so it can still be placed and configured.
- */
 export class CustomerPhotosSnippet extends Interaction {
     static selector = ".s_customer_photos";
     dynamicContent = {
