@@ -554,6 +554,37 @@ this file (136 notes, by file). Kept in the code: the license header line and `#
 otherwise (diff = comment lines only): module updates cleanly, 59 tests pass, the three JS files pass `node --check`.
 The older log entries above quote some code comments in prose; that is fine, the section below is the full set.
 
+### 2026-11-09 — lightbox: tap the photo for full screen (whole photo); home block rule under the subtitle
+
+59 tests, 0 failed. XML / SCSS / JS only: `-u`, no restart. **Supersedes the "tiny bit uncropped" entry** (`fitImage()` and
+`LIGHTBOX_FILL` removed: plain CSS now).
+
+- **In the modal the photo stays cropped to fill its panel** (`object-fit: cover`, badge / like / arrows / thumbnails overlaid as in
+  the mockup). First attempt wrongly showed the whole photo there; the client meant: modal cropped, *full screen* uncropped.
+- **Tap the photo -> full screen with the whole photo** (`contain`): `data-action="zoom"` on the stage; `setZoom()` toggles
+  `.o_mcp_zoomed`, which makes the stage a fixed full-viewport dark layer (arrows keep working). CSS only, no Fullscreen API (iOS
+  Safari has none for images). Leave by tapping the photo or the × (`aria-label="Close"`, existing translation), or Escape (leaves
+  the zoom first; a second Escape closes the lightbox). Closing the lightbox resets it.
+- **Home block, phone / tablet (< 992 px):** order is title, subtitle, **gold rule**, mosaic... (rule was above the title). Desktop
+  unchanged. Blocks already dropped on a page get it too (CSS only).
+- **Not looked at in a browser** (no published photo with an image on `mconfort`): tests, JS syntax, SCSS compile only.
+
+### 2026-11-09 — cache for `/photos-clients/featured`
+
+60 tests, 0 failed. Python change -> **elevated service restart**.
+
+- Photo images were already cached by the browser (`website.image_url` adds `?unique=<hash>`). Only the home block's JSON was hit on
+  every home-page view, so only that is cached now: `mconfort.customer.photo._featured_values(limit)` is `@tools.ormcache('limit',
+  'self.env.lang')`, and the controller just returns it.
+- **Cleared** (`registry.clear_cache()`) on: photo create / unlink / write of `is_published featured city product_id submitted_on
+  image_ids firstname lastname`, and on any create / write / unlink of a photo image. Likes, IP purge and chatter writes do not clear it.
+- **Odoo 19 trap:** cache names are a fixed set (`_CACHES_BY_KEY` in `orm/registry.py`: default, assets, stable, templates, routing,
+  groups). A custom `cache='mcp_featured'` raises `KeyError` at `clear_cache` and broke 46 tests. Clearing `default` also empties
+  `templates.cached_values`; fine here because the watched writes are rare.
+- **Known staleness:** renaming the product, or editing its translation, does not clear it (the `alt` text lags until the next photo change
+  or a restart). Add a `product.template` hook only if it matters.
+- Test `test_cached_answer_follows_every_change` (city edit, reject, re-approve, image unlink).
+
 ## Design notes
 
 - **Notification = `activity_schedule`** on every validator (group `all_user_ids`), closed by
@@ -579,6 +610,8 @@ filed under its file, with the line of code it used to sit on or above (*near*),
 that code. **New code: put the explanation in this section, not in the source.**
 
 ### `models/customer_photo.py`
+
+- *near* `def _featured_values(self, limit):` — Cached answer of /photos-clients/featured (see the 2026-11-09 cache entry). Every write that changes what it shows clears the cache: FEATURED_FIELDS on the photo, any change on its images.
 
 - *near* `class CustomerPhoto(models.Model):` — One submission: a customer, their photos, an optional review. Lifecycle: pending (just submitted, validators get an activity) -> approved (published on the website) or rejected (never shown).
 - *near* `class CustomerPhotoImage(models.Model):` — One photo of a submission. `image.mixin` gives the 1920/1024/512/256/128 variants. The related `website_published` is what lets `/web/image/<model>/<id>/image_512` serve approved photos to the public: website's `_can_return_content` grants read on binary fields when that field is True.
@@ -656,10 +689,8 @@ that code. **New code: put the explanation in this section, not in the source.**
 ### `static/src/interactions/gallery.js`
 
 - *near* `const MAX_PHOTOS = 8;` — keep in step with controllers/main.py
-- *near* `const LIGHTBOX_FILL = 0.75;` — [section] Lightbox photo size between "whole photo" (0) and "cropped to fill the panel" (1). 0.75 = mostly filled, but zoomed out a bit so more of the photo shows; a thin dark band may appear on one side. Raise it to crop more.
 - *near* `export class CustomerPhotoGallery extends Interaction {` — /photos-clients: sort select, lightbox and likes. The lightbox markup (and its translated text) is rendered by the server in `gallery`; this only fills its `data-slot` elements from the card's JSON (`data-lightbox`), so there is no detail route.
 - *near* `".o_mcp_sort, .o_mcp_categ_select": { "t-on-change": this.onSortChange },` — The category select (phones) and the sort select share one form: either one reloads the page.
-- *near* `this.addListener(this.slot("image"), "load", () => this.fitImage());` — Size the lightbox photo each time one finishes loading.
 - *near* `if (this.el.dataset.open) {` — Deep link /photos-clients?open=<id>: the server sends the card even when it is on another page or filter.
 - *near* `onSortChange(ev) {` — [section] Handlers
 - *near* `const items = [...(uploading ? this.upload : this.lightbox).querySelectorAll(FOCUSABLE)];` — Keep focus inside the dialog while it is open.
@@ -670,8 +701,7 @@ that code. **New code: put the explanation in this section, not in the source.**
 - *near* `const body = new FormData(form);` — the file input has no name: photos are added below
 - *near* `const data = await this.waitFor(response.json().catch(() => ({ error: "network" })));` — An oversized body is answered by the framework with HTML, not our JSON.
 - *near* `open(card, opener = null) {` — [section] Lightbox
-- *near* `this.fitImage();` — the panel has a size now (it was display: none while rendering)
-- *near* `fitImage() {` — Photo size: halfway-ish between "whole photo" and "cropped to fill the panel" (see LIGHTBOX_FILL), centred in the panel. Plain CSS cannot blend `contain` and `cover`.
+- *near* `setZoom(on) {` — Full-screen photo: a class on the lightbox turns the stage into a fixed full-viewport layer (CSS only, no Fullscreen API: iOS Safari has none for images). Tap the photo or the × to leave; Escape leaves the zoom before it closes the lightbox.
 - *near* `const cardEl = this.el.querySelector('.o_mcp_card[data-id="${card.id}"]');` — Keep the card's data in step, so reopening it shows the new count and heart.
 - *near* `const product = this.slot("product");` — A link only when the shop shows that product; otherwise plain text.
 
@@ -701,7 +731,7 @@ that code. **New code: put the explanation in this section, not in the source.**
 - *near* `width: unquote("min(1400px, 100%)");` — plain `min()` is evaluated by Sass: "Incompatible units"
 - *near* `.o_mcp_lb_media {` — Left column: the photo fills the whole panel (cropped to fit, `cover`), with the badge + like on top of it, the arrows on the sides and the thumbnails at the bottom.
 - *near* `flex: 2 1 600px;` — 600 + the details column's 380 fit a 1024 px window side by side; extra width goes 2:1 to the photo.
-- *near* `.o_mcp_lb_image {` — Centred; gallery.js sets its width / height (a little smaller than "cover"). Until then: plain cover.
+- *near* `.o_mcp_lb_image {` — Fills the stage, `object-fit: cover`. Clicking the stage (photo included) zooms to full screen, where the same image switches to `contain` (whole photo).
 - *near* `.o_mcp_btn_primary {` — ---- Call to action + upload modal (lot 3)
 - *near* `&.has_image {` — Picture set in Website settings: cover it, keep the text readable with a navy fade at the bottom.
 - *near* `@media (max-width: 767.98px) { display: none; }` — the form is what matters on a phone
@@ -715,7 +745,7 @@ that code. **New code: put the explanation in this section, not in the source.**
 - *near* `.s_cp_title { font-size: 2.6rem; font-weight: 800; line-height: 1.1; @media (max-width: 57` — Phones: both fit on one line, as in the mobile mockup.
 - *near* `@media (min-width: 992px) { margin-top: 3.5rem !important; }` — Desktop: more air between the photos and the row. !important because the markup carries Bootstrap's `mt-4` (also on blocks already dropped on a page), which is !important itself.
 - *near* `@media (max-width: 575.98px) {` — Phones: the three items always share ONE row (icon + text side by side, as in the mockup). Equal thirds and no wrapping whatever the column classes of the markup (a block dropped before this rule has `col-12`), and the text scales with the screen so it still fits at 320 px.
-- *near* `@media (max-width: 991.98px) {` — ---- Phone and tablet: one column, in this order rule, title, subtitle, mosaic, trust row, button. The button sits in the text column on desktop, so that column and the first row dissolve (display: contents): their children become siblings of the trust row and `order` can move the button last, without a second copy of it to maintain.
+- *near* `@media (max-width: 991.98px) {` — ---- Phone and tablet: one column, in this order title, subtitle, gold rule, mosaic, trust row, button. The button sits in the text column on desktop, so that column and the first row dissolve (display: contents): their children become siblings of the trust row and `order` can move the button last, without a second copy of it to maintain.
 - *near* `.s_cp_line {` — First line of the title / subtitle: its own line on desktop, a word group followed by a gap otherwise.
 - *near* `.s_cp_mosaic {` — ---- Mosaic: one large tile + two small ones
 - *near* `grid-template-columns: 1.3fr 1fr;` — Same shape as desktop (large tile left, two stacked right), sized by ratio instead of pixels.

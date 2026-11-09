@@ -165,17 +165,7 @@ class CustomerPhotos(http.Controller):
     @http.route('/photos-clients/featured', type='jsonrpc', auth='public', website=True, readonly=True)
     def featured(self, limit=3):
         limit = limit if isinstance(limit, int) and 1 <= limit <= 6 else 3
-        photos = request.env['mconfort.customer.photo'].sudo().search(
-            [('is_published', '=', True), ('image_ids', '!=', False)],
-            order='featured desc, submitted_on desc, id desc', limit=limit)
-        website = request.env['website']
-        return [{
-            'id': photo.id,
-            'url': photo.website_url,
-            'image': website.image_url(photo.cover_image_id, 'image_1024'),
-            'alt': photo.product_id.name or photo.name,
-            'caption': _("Client M'Confort – %s", photo.city) if photo.city else _("Client M'Confort"),
-        } for photo in photos]
+        return request.env['mconfort.customer.photo']._featured_values(limit)
 
     @http.route('/photos-clients/like', type='jsonrpc', auth='public', website=True)
     def like(self, photo_id):

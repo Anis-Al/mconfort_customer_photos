@@ -411,6 +411,21 @@ class TestFeatured(HttpCase, Common):
         item = next(p for p in self._featured(limit=6) if p['id'] == photo.id)
         self.assertEqual((item['caption'], item['alt']), ("Client M'Confort", "Mehdi F."))
 
+    def test_cached_answer_follows_every_change(self):
+        photo = self._approved(city="Kaweni", featured=True)
+        ids = lambda: [p['id'] for p in self._featured(limit=6)]
+        self.assertIn(photo.id, ids())
+        self.assertIn(photo.id, ids())
+        photo.city = "Mamoudzou"
+        item = next(p for p in self._featured(limit=6) if p['id'] == photo.id)
+        self.assertEqual(item['caption'], "Client M'Confort – Mamoudzou")
+        photo.action_reject()
+        self.assertNotIn(photo.id, ids())
+        photo.action_approve()
+        self.assertIn(photo.id, ids())
+        photo.image_ids.unlink()
+        self.assertNotIn(photo.id, ids())
+
     def test_published_submission_without_photo_is_left_out(self):
         empty = self._approved(image_ids=[], featured=True)
         self.assertNotIn(empty.id, [p['id'] for p in self._featured(limit=6)])

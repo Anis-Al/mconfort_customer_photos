@@ -110,8 +110,9 @@
                                     <span data-slot="likes"/>
                                 </button>
                             </div>
-                            <div class="o_mcp_lb_stage">
+                            <div class="o_mcp_lb_stage" data-action="zoom">
                                 <img class="o_mcp_lb_image" data-slot="image" alt=""/>
+                                <button type="button" class="o_mcp_lb_unzoom d-none" data-slot="unzoom" data-action="zoom" aria-label="Close">&#215;</button>
                                 <button type="button" class="o_mcp_lb_nav o_mcp_lb_prev" data-action="prev" aria-label="Previous photo">&#8249;</button>
                                 <button type="button" class="o_mcp_lb_nav o_mcp_lb_next" data-action="next" aria-label="Next photo">&#8250;</button>
                             </div>

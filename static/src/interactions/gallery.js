@@ -4,7 +4,6 @@ import { rpc } from "@web/core/network/rpc";
 
 const FOCUSABLE = "button:not([disabled]):not(.d-none), input:not([type=hidden]):not([tabindex='-1']), textarea";
 const MAX_PHOTOS = 8;
-const LIGHTBOX_FILL = 0.75;
 
 export class CustomerPhotoGallery extends Interaction {
     static selector = ".o_mcp_gallery";
@@ -22,7 +21,6 @@ export class CustomerPhotoGallery extends Interaction {
         },
         ".o_mcp_upload_form": { "t-on-submit.prevent": this.onSubmit },
         _document: { "t-on-keydown": this.onKeydown },
-        _window: { "t-on-resize": this.fitImage },
     };
 
     setup() {
@@ -35,7 +33,6 @@ export class CustomerPhotoGallery extends Interaction {
     }
 
     start() {
-        this.addListener(this.slot("image"), "load", () => this.fitImage());
         if (this.el.dataset.open) {
             this.open(JSON.parse(this.el.dataset.open));
         }
@@ -72,6 +69,8 @@ export class CustomerPhotoGallery extends Interaction {
         const action = target.dataset.action;
         if (action === "close") {
             this.close();
+        } else if (action === "zoom") {
+            this.setZoom(!this.lightbox.classList.contains("o_mcp_zoomed"));
         } else if (action === "prev") {
             this.go(-1);
         } else if (action === "next") {
@@ -87,7 +86,13 @@ export class CustomerPhotoGallery extends Interaction {
             return;
         }
         if (ev.key === "Escape") {
-            uploading ? this.closeUpload() : this.close();
+            if (uploading) {
+                this.closeUpload();
+            } else if (this.lightbox.classList.contains("o_mcp_zoomed")) {
+                this.setZoom(false);
+            } else {
+                this.close();
+            }
         } else if (this.card && ev.key === "ArrowLeft") {
             this.go(-1);
         } else if (this.card && ev.key === "ArrowRight") {
@@ -245,25 +250,21 @@ export class CustomerPhotoGallery extends Interaction {
         this.render();
         this.lightbox.classList.remove("d-none");
         document.body.classList.add("overflow-hidden");
-        this.fitImage();
         this.lightbox.querySelector(".o_mcp_lb_close").focus();
     }
 
-    fitImage() {
-        const img = this.slot("image");
-        const { clientWidth: width, clientHeight: height } = img.parentElement;
-        const { naturalWidth: nw, naturalHeight: nh } = img;
-        if (!this.card || !nw || !width) {
-            return;
+    setZoom(on) {
+        this.lightbox.classList.toggle("o_mcp_zoomed", on);
+        this.slot("unzoom").classList.toggle("d-none", !on);
+        if (on) {
+            this.slot("unzoom").focus();
+        } else if (this.card) {
+            this.lightbox.querySelector(".o_mcp_lb_close").focus();
         }
-        const contain = Math.min(width / nw, height / nh);
-        const cover = Math.max(width / nw, height / nh);
-        const scale = contain + (cover - contain) * LIGHTBOX_FILL;
-        img.style.width = `${Math.round(nw * scale)}px`;
-        img.style.height = `${Math.round(nh * scale)}px`;
     }
 
     close() {
+        this.setZoom(false);
         this.card = null;
         this.lightbox.classList.add("d-none");
         document.body.classList.remove("overflow-hidden");

@@ -2,8 +2,11 @@
 
 from datetime import timedelta
 
-from odoo import _, api, fields, models
+from odoo import _, api, fields, models, tools
 from odoo.tools.misc import format_date
+
+FEATURED_FIELDS = {'is_published', 'featured', 'city', 'product_id', 'submitted_on', 'image_ids',
+                   'firstname', 'lastname'}
 
 
 class CustomerPhoto(models.Model):
@@ -78,7 +81,32 @@ class CustomerPhoto(models.Model):
     def create(self, vals_list):
         records = super().create(vals_list)
         records._notify_validators()
+        self.env.registry.clear_cache()
         return records
+
+    def write(self, vals):
+        if FEATURED_FIELDS & vals.keys():
+            self.env.registry.clear_cache()
+        return super().write(vals)
+
+    def unlink(self):
+        self.env.registry.clear_cache()
+        return super().unlink()
+
+    @api.model
+    @tools.ormcache('limit', 'self.env.lang')
+    def _featured_values(self, limit):
+        photos = self.sudo().search(
+            [('is_published', '=', True), ('image_ids', '!=', False)],
+            order='featured desc, submitted_on desc, id desc', limit=limit)
+        website = self.env['website']
+        return [{
+            'id': photo.id,
+            'url': photo.website_url,
+            'image': website.image_url(photo.cover_image_id, 'image_1024'),
+            'alt': photo.product_id.name or photo.name,
+            'caption': _("Client M'Confort – %s", photo.city) if photo.city else _("Client M'Confort"),
+        } for photo in photos]
 
     def _notify_validators(self):
         validators = self.env.ref('mconfort_customer_photos.group_manager').all_user_ids
@@ -144,3 +172,16 @@ class CustomerPhotoImage(models.Model):
     name = fields.Char()
     image_1920 = fields.Image(required=True, max_width=1920, max_height=1920)
     website_published = fields.Boolean(related='submission_id.website_published')
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        self.env.registry.clear_cache()
+        return super().create(vals_list)
+
+    def write(self, vals):
+        self.env.registry.clear_cache()
+        return super().write(vals)
+
+    def unlink(self):
+        self.env.registry.clear_cache()
+        return super().unlink()
