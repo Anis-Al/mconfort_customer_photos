@@ -569,6 +569,15 @@ The older log entries above quote some code comments in prose; that is fine, the
   unchanged. Blocks already dropped on a page get it too (CSS only).
 - **Not looked at in a browser** (no published photo with an image on `mconfort`): tests, JS syntax, SCSS compile only.
 
+### 2026-11-09 — full-screen photo: blurred page behind instead of solid navy
+
+Client: "instead of that blue background on the fullscreen pic, I want a tiny bit blurred previous screen". SCSS only
+(`-u`, no restart): `.o_mcp_lightbox.o_mcp_zoomed .o_mcp_lb_stage` background is now `rgba(10, 19, 48, .45)` +
+`backdrop-filter: blur(10px)` (with `-webkit-` prefix for older Safari) instead of `#0A1330`. What shows through is the
+lightbox dialog and, under its own backdrop, the gallery page. Browsers without `backdrop-filter` get the translucent navy
+alone (sharp, darker). The modal's own `.o_mcp_lb_media` panel keeps `#0F1730` (cropped view, unchanged). Knobs: the alpha
+(.45) and the blur radius (10px). Not looked at in a browser (no published photo with an image on `mconfort`).
+
 ### 2026-11-09 — cache for `/photos-clients/featured`
 
 60 tests, 0 failed. Python change -> **elevated service restart**.
